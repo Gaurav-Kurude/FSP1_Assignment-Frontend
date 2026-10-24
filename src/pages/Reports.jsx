@@ -24,7 +24,7 @@ ChartJS.register(
   Title,
 );
 
-const API_URL = "https://fsp-1-assignment-backend-plum.vercel.app/";
+const API_URL = "https://fsp-1-assignment-backend-plum.vercel.app";
 
 const chartOptions = {
   responsive: true,
