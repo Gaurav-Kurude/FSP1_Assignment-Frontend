@@ -22,7 +22,7 @@ function Signup() {
     setLoading(true);
 
     try {
-      const response = await axios.post("http://localhost:5000/auth/signup", {
+      const response = await axios.post("https://fsp-1-assignment-backend-plum.vercel.app/auth/signup", {
         name: name.trim(),
         email: email.trim().toLowerCase(),
         password,

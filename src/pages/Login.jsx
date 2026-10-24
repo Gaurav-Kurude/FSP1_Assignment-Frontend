@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../App.css";
 
-const API_URL = "http://localhost:5000";
+const API_URL = "https://fsp-1-assignment-backend-plum.vercel.app/";
 
 function Login() {
   const navigate = useNavigate();
