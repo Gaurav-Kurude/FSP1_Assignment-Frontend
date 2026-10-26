@@ -188,7 +188,7 @@ function Dashboard() {
             className="btn btn-primary add-task-button"
             onClick={() => navigate("/projects")}
           >
-            + Add New Task
+            + Add New Project
           </button>
         </header>
 
