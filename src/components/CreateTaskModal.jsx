@@ -120,6 +120,7 @@ function CreateTaskModal({ projectId, projectName, onClose, onTaskCreated }) {
         owners: formData.owners,
         tags: formData.tags,
         timeToComplete,
+        status: "To Do",
       };
 
       // Include dueDate only after the backend schema and API support it.
