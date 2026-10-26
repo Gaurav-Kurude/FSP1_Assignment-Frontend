@@ -415,19 +415,6 @@ function Dashboard() {
                           >
                             View →
                           </Link>
-
-                          {task.status !== "Completed" && (
-                            <button
-                              type="button"
-                              className="btn btn-sm btn-success"
-                              onClick={() => handleMarkComplete(task._id)}
-                              disabled={completingTaskId === task._id}
-                            >
-                              {completingTaskId === task._id
-                                ? "Updating..."
-                                : "Mark as Complete"}
-                            </button>
-                          )}
                         </div>
                       </article>
                     );

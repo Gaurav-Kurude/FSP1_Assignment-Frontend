@@ -42,10 +42,12 @@ export default function TaskDetail() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const fetchTaskDetails = useCallback(async () => {
     setLoading(true);
     setError("");
+    setSuccess("");
 
     try {
       const token = localStorage.getItem("token");
@@ -82,10 +84,11 @@ export default function TaskDetail() {
       const allTags = getItems(tagsResponse.data, "tags");
 
       const selectedTask = allTasks.find(
-        (item) => getId(item) === taskId
+        (item) => getId(item) === String(taskId),
       );
 
       if (!selectedTask) {
+        setTask(null);
         setError("Task not found.");
         return;
       }
@@ -96,9 +99,13 @@ export default function TaskDetail() {
       setUsers(allUsers);
       setTags(allTags);
     } catch (err) {
+      console.error(
+        "Fetch task details error:",
+        err.response?.data || err.message,
+      );
       setError(
         err.response?.data?.message ||
-          "Unable to load task details. Please check your backend API."
+          "Unable to load task details. Please check your backend API.",
       );
     } finally {
       setLoading(false);
@@ -110,50 +117,46 @@ export default function TaskDetail() {
   }, [fetchTaskDetails]);
 
   const markAsComplete = async () => {
-    if (!task || task.status === "Completed") return;
+    if (!task || task.status === "Completed" || saving) return;
 
     setSaving(true);
     setError("");
+    setSuccess("");
 
     try {
       const token = localStorage.getItem("token");
 
-      // Your current backend uses POST /tasks/:id for updating a task.
-      const updatedTask = {
-        ...task,
-        project: getId(task.project),
-        team: getId(task.team),
-        owners: (task.owners || []).map(getId),
-        tags: (task.tags || []).map(getId),
-        status: "Completed",
-      };
+      if (!token) {
+        navigate("/login");
+        return;
+      }
 
+      // Send only the field being changed. Sending the entire populated task
+      // can include unsupported fields such as _id, createdAt, and updatedAt.
       const response = await axios.post(
         `${API_URL}/tasks/${taskId}`,
-        updatedTask,
+        { status: "Completed" },
         {
           headers: {
             Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
           },
-        }
+        },
       );
 
-      const returnedTask =
-        response.data?.task || response.data?.data || response.data;
-
-      setTask({
-        ...task,
-        ...(returnedTask &&
-        typeof returnedTask === "object" &&
-        returnedTask._id
-          ? returnedTask
-          : {}),
-        status: "Completed",
-      });
+      // The backend has confirmed the update, so update the displayed status.
+      setTask((currentTask) =>
+        currentTask ? { ...currentTask, status: "Completed" } : currentTask,
+      );
+      setSuccess(response.data?.message || "Task marked as completed.");
     } catch (err) {
+      console.error(
+        "Mark task complete error:",
+        err.response?.data || err.message,
+      );
       setError(
         err.response?.data?.message ||
-          "Unable to update the task status."
+          "Unable to update the task status. Please try again.",
       );
     } finally {
       setSaving(false);
@@ -171,10 +174,11 @@ export default function TaskDetail() {
   if (!task) {
     return (
       <div className="task-detail-page">
-        <div className="alert alert-danger">
+        <div className="alert alert-danger" role="alert">
           {error || "Task not found."}
         </div>
         <button
+          type="button"
           className="btn btn-outline-secondary"
           onClick={() => navigate("/dashboard")}
         >
@@ -188,25 +192,17 @@ export default function TaskDetail() {
   const projectName = getName(task.project, projects);
   const teamName = getName(task.team, teams);
 
-  const ownerNames = (task.owners || []).map((owner) =>
-    getName(owner, users)
-  );
+  const ownerNames = (task.owners || []).map((owner) => getName(owner, users));
 
   const tagNames = (task.tags || []).map((tag) =>
-    getName(tag, tags, typeof tag === "string" ? tag : "Tag")
+    getName(tag, tags, typeof tag === "string" ? tag : "Tag"),
   );
 
-  const dueDate = task.dueDate
-    ? new Date(task.dueDate)
-    : null;
-
-  const validDueDate =
-    dueDate && !Number.isNaN(dueDate.getTime());
+  const dueDate = task.dueDate ? new Date(task.dueDate) : null;
+  const validDueDate = dueDate && !Number.isNaN(dueDate.getTime());
 
   const daysRemaining = validDueDate
-    ? Math.ceil(
-        (dueDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
-      )
+    ? Math.ceil((dueDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
     : null;
 
   return (
@@ -235,14 +231,16 @@ export default function TaskDetail() {
         </div>
       )}
 
+      {success && (
+        <div className="alert alert-success" role="status">
+          {success}
+        </div>
+      )}
+
       <div className="task-detail-layout">
         <aside className="task-detail-sidebar">
           <Link
-            to={
-              projectId
-                ? `/projects/${projectId}`
-                : "/dashboard"
-            }
+            to={projectId ? `/projects/${projectId}` : "/dashboard"}
             className="btn btn-outline-secondary w-100"
           >
             ← Back to Project
@@ -255,13 +253,12 @@ export default function TaskDetail() {
 
           <div className="task-sidebar-info">
             <span>Time Required</span>
-            <strong>
-              {task.timeToComplete ?? "—"} hours
-            </strong>
+            <strong>{task.timeToComplete ?? "—"} days</strong>
           </div>
 
           {task.status !== "Completed" && (
             <button
+              type="button"
               className="btn btn-success w-100"
               onClick={markAsComplete}
               disabled={saving}
@@ -339,12 +336,12 @@ export default function TaskDetail() {
                 {task.status === "Completed"
                   ? "Completed"
                   : daysRemaining === null
-                  ? "Not available"
-                  : daysRemaining < 0
-                  ? `${Math.abs(daysRemaining)} day(s) overdue`
-                  : daysRemaining === 0
-                  ? "Due today"
-                  : `${daysRemaining} day(s) remaining`}
+                    ? "Not available"
+                    : daysRemaining < 0
+                      ? `${Math.abs(daysRemaining)} day(s) overdue`
+                      : daysRemaining === 0
+                        ? "Due today"
+                        : `${daysRemaining} day(s) remaining`}
               </strong>
             </div>
 
@@ -352,9 +349,7 @@ export default function TaskDetail() {
               <span>Created On</span>
               <strong>
                 {task.createdAt
-                  ? new Date(task.createdAt).toLocaleDateString(
-                      "en-IN"
-                    )
+                  ? new Date(task.createdAt).toLocaleDateString("en-IN")
                   : "Not available"}
               </strong>
             </div>
