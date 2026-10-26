@@ -33,6 +33,9 @@ const chartOptions = {
     legend: {
       position: "bottom",
     },
+    title: {
+      display: false,
+    },
   },
   scales: {
     y: {
@@ -48,10 +51,10 @@ function getArray(response) {
   const data = response?.data;
 
   if (Array.isArray(data)) return data;
-  if (Array.isArray(data?.data)) return data.data;
+  if (Array.isArray(data?.tasks)) return data.tasks;
   if (Array.isArray(data?.results)) return data.results;
   if (Array.isArray(data?.report)) return data.report;
-  if (Array.isArray(data?.tasks)) return data.tasks;
+  if (Array.isArray(data?.data)) return data.data;
 
   return [];
 }
@@ -92,6 +95,7 @@ function getLabel(item, type) {
 
 function getClosedCount(item) {
   return getNumber(item, [
+    "completedTasks",
     "count",
     "total",
     "totalClosed",
@@ -130,6 +134,7 @@ function ReportCard({ title, description, children }) {
         <h2>{title}</h2>
         {description && <p>{description}</p>}
       </div>
+
       <div className="report-chart">{children}</div>
     </section>
   );
@@ -137,7 +142,7 @@ function ReportCard({ title, description, children }) {
 
 export default function Reports() {
   const [lastWeekCount, setLastWeekCount] = useState(0);
-  const [pendingHours, setPendingHours] = useState(0);
+  const [pendingDays, setPendingDays] = useState(0);
   const [teamRows, setTeamRows] = useState([]);
   const [ownerRows, setOwnerRows] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -176,7 +181,7 @@ export default function Reports() {
 
       if (failedReports.length === results.length) {
         throw new Error(
-          "Unable to load reports. Check your backend and report routes.",
+          "Unable to load reports. Check your backend APIs and login token.",
         );
       }
 
@@ -191,33 +196,33 @@ export default function Reports() {
             "completedCount",
           ]) || getArray(lastWeekResult.value).length,
         );
+      } else {
+        setLastWeekCount(0);
       }
 
       if (pendingResult.status === "fulfilled") {
         const data = pendingResult.value.data;
 
-        setPendingHours(
-          getNumber(data, [
-            "totalPendingTime",
-            "totalPendingHours",
-            "pendingHours",
-            "totalTime",
-            "total",
-          ]),
-        );
+        setPendingDays(getNumber(data, ["totalPendingDays"]));
+      } else {
+        setPendingDays(0);
       }
 
       if (teamResult.status === "fulfilled") {
         setTeamRows(getArray(teamResult.value));
+      } else {
+        setTeamRows([]);
       }
 
       if (ownerResult.status === "fulfilled") {
         setOwnerRows(getArray(ownerResult.value));
+      } else {
+        setOwnerRows([]);
       }
 
       if (failedReports.length > 0) {
         setError(
-          "Some reports could not be loaded. Check the corresponding backend routes.",
+          "Some reports could not be loaded. Check the failed report API in your backend.",
         );
       }
     } catch (err) {
@@ -232,11 +237,11 @@ export default function Reports() {
   }, [fetchReports]);
 
   const pendingChartData = {
-    labels: ["Estimated pending hours"],
+    labels: ["Estimated pending days"],
     datasets: [
       {
-        label: "Hours",
-        data: [pendingHours],
+        label: "Days",
+        data: [pendingDays],
         backgroundColor: ["#f5b544"],
         borderRadius: 8,
       },
@@ -253,6 +258,16 @@ export default function Reports() {
         borderRadius: 8,
       },
     ],
+  };
+
+  const pendingChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: "bottom",
+      },
+    },
   };
 
   return (
@@ -306,8 +321,8 @@ export default function Reports() {
 
                 <div className="report-summary-card pending-summary">
                   <span>Pending Work</span>
-                  <strong>{pendingHours}</strong>
-                  <small>Estimated hours remaining</small>
+                  <strong>{pendingDays}</strong>
+                  <small>Estimated days remaining</small>
                 </div>
               </div>
 
@@ -324,19 +339,11 @@ export default function Reports() {
                 <div id="pending-work">
                   <ReportCard
                     title="Total Work Pending"
-                    description="Estimated hours for tasks not yet completed."
+                    description="Estimated days for tasks not yet completed."
                   >
                     <Doughnut
                       data={pendingChartData}
-                      options={{
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                          legend: {
-                            position: "bottom",
-                          },
-                        },
-                      }}
+                      options={pendingChartOptions}
                     />
                   </ReportCard>
                 </div>
