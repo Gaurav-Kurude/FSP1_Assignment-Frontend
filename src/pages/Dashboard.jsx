@@ -21,6 +21,8 @@ function Dashboard() {
   const [activeFilter, setActiveFilter] = useState("All Tasks");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [completingTaskId, setCompletingTaskId] = useState(null);
+  const [taskActionMessage, setTaskActionMessage] = useState("");
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -112,6 +114,49 @@ function Dashboard() {
       .toUpperCase();
   };
 
+  const handleMarkComplete = async (taskId) => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    try {
+      setCompletingTaskId(taskId);
+      setTaskActionMessage("");
+
+      await axios.post(
+        `${API_URL}/tasks/${taskId}`,
+        { status: "Completed" },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      // Update the dashboard immediately after the API succeeds.
+      setTasks((currentTasks) =>
+        currentTasks.map((task) =>
+          task._id === taskId ? { ...task, status: "Completed" } : task,
+        ),
+      );
+      setTaskActionMessage("Task marked as completed.");
+    } catch (err) {
+      console.error(
+        "Mark task complete error:",
+        err.response?.data || err.message,
+      );
+      setTaskActionMessage(
+        err.response?.data?.message ||
+          "Unable to mark this task as complete. Please try again.",
+      );
+    } finally {
+      setCompletingTaskId(null);
+    }
+  };
+
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -191,6 +236,12 @@ function Dashboard() {
             + Add New Project
           </button>
         </header>
+
+        {taskActionMessage && (
+          <div className="alert alert-info" role="status">
+            {taskActionMessage}
+          </div>
+        )}
 
         {error && (
           <div className="alert alert-danger" role="alert">
@@ -357,12 +408,27 @@ function Dashboard() {
                           {task.status}
                         </span>
 
-                        <Link
-                          to={`/tasks/${task._id}`}
-                          className="text-decoration-none"
-                        >
-                          View →
-                        </Link>
+                        <div className="d-flex align-items-center gap-2">
+                          <Link
+                            to={`/tasks/${task._id}`}
+                            className="text-decoration-none"
+                          >
+                            View →
+                          </Link>
+
+                          {task.status !== "Completed" && (
+                            <button
+                              type="button"
+                              className="btn btn-sm btn-success"
+                              onClick={() => handleMarkComplete(task._id)}
+                              disabled={completingTaskId === task._id}
+                            >
+                              {completingTaskId === task._id
+                                ? "Updating..."
+                                : "Mark as Complete"}
+                            </button>
+                          )}
+                        </div>
                       </article>
                     );
                   })
