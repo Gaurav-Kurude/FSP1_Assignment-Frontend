@@ -42,17 +42,14 @@ function ProjectManagement() {
       setError("");
       setLoading(true);
 
-      const [projectResponse, taskResponse, userResponse, tagResponse] =
-        await Promise.all([
-          axios.get(`${API_URL}/projects`, config),
-          axios.get(`${API_URL}/tasks?project=${projectId}`, config),
-          axios.get(`${API_URL}/users`, config),
-          axios.get(`${API_URL}/tags`, config),
-        ]);
+      const [projectResponse, taskResponse, tagResponse] = await Promise.all([
+        axios.get(`${API_URL}/projects/${projectId}`, config),
+        axios.get(`${API_URL}/tasks?project=${projectId}`, config),
+        axios.get(`${API_URL}/tags`, config),
+      ]);
 
-      const projects = projectResponse.data.projects || [];
-
-      const selectedProject = projects.find((item) => item._id === projectId);
+      // Get the selected project directly by ID
+      const selectedProject = projectResponse.data.project;
 
       if (!selectedProject) {
         setProject(null);
@@ -63,16 +60,24 @@ function ProjectManagement() {
 
       setProject(selectedProject);
 
+      // Handle the tasks response
       const fetchedTasks = Array.isArray(taskResponse.data)
         ? taskResponse.data
         : taskResponse.data.tasks || [];
 
       setTasks(fetchedTasks);
 
-      setUsers(userResponse.data.users || []);
+      // Tasks already include populated owner details
+      setUsers([]);
+
+      // Store tags
       setTags(tagResponse.data.tags || []);
     } catch (err) {
-      console.error("Project data error:", err);
+      console.error(
+        "Project data error:",
+        err.response?.status,
+        err.response?.data || err.message,
+      );
 
       setError(
         err.response?.data?.message ||
