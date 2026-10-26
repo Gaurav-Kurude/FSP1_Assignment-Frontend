@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const API_URL = (import.meta.env.VITE_API_URL || "").replace(/\/+$/, "");
 
 function Projects() {
+  const navigate = useNavigate();
+
   const [projects, setProjects] = useState([]);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -38,6 +41,12 @@ function Projects() {
     fetchProjects();
   }, []);
 
+  const resetForm = () => {
+    setName("");
+    setDescription("");
+    setEditingId(null);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -51,24 +60,79 @@ function Projects() {
       setError("");
       setMessage("");
 
-      await axios.post(
-        `${API_URL}/projects`,
-        {
-          name: name.trim(),
-          description: description.trim(),
-        },
-        { headers: getHeaders() },
-      );
+      if (editingId) {
+        await axios.put(
+          `${API_URL}/projects/${editingId}`,
+          {
+            name: name.trim(),
+            description: description.trim(),
+          },
+          { headers: getHeaders() },
+        );
 
-      setName("");
-      setDescription("");
-      setMessage("Project created successfully!");
+        setMessage("Project updated successfully.");
+      } else {
+        await axios.post(
+          `${API_URL}/projects`,
+          {
+            name: name.trim(),
+            description: description.trim(),
+          },
+          { headers: getHeaders() },
+        );
 
+        setMessage("Project created successfully.");
+      }
+
+      resetForm();
       await fetchProjects();
     } catch (err) {
-      setError(err.response?.data?.message || "Unable to create project.");
+      setError(
+        err.response?.data?.message ||
+          (editingId
+            ? "Unable to update project."
+            : "Unable to create project."),
+      );
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleEdit = (project) => {
+    setEditingId(project._id);
+    setName(project.name || "");
+    setDescription(project.description || "");
+    setError("");
+    setMessage("");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleDelete = async (project) => {
+    const confirmed = window.confirm(
+      `Are you sure you want to delete "${project.name}"?`,
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setError("");
+      setMessage("");
+
+      await axios.delete(`${API_URL}/projects/${project._id}`, {
+        headers: getHeaders(),
+      });
+
+      setProjects((current) =>
+        current.filter((item) => item._id !== project._id),
+      );
+
+      if (editingId === project._id) {
+        resetForm();
+      }
+
+      setMessage("Project deleted successfully.");
+    } catch (err) {
+      setError(err.response?.data?.message || "Unable to delete project.");
     }
   };
 
@@ -92,7 +156,9 @@ function Projects() {
 
       <div className="card shadow-sm mb-4">
         <div className="card-body">
-          <h5 className="card-title mb-3">Create New Project</h5>
+          <h5 className="card-title mb-3">
+            {editingId ? "Edit Project" : "Create New Project"}
+          </h5>
 
           <form onSubmit={handleSubmit}>
             <div className="mb-3">
@@ -124,9 +190,28 @@ function Projects() {
               />
             </div>
 
-            <button type="submit" className="btn btn-primary" disabled={saving}>
-              {saving ? "Creating..." : "Create Project"}
+            <button
+              type="submit"
+              className="btn btn-primary me-2"
+              disabled={saving}
+            >
+              {saving
+                ? "Saving..."
+                : editingId
+                  ? "Save Changes"
+                  : "Create Project"}
             </button>
+
+            {editingId && (
+              <button
+                type="button"
+                className="btn btn-outline-secondary"
+                onClick={resetForm}
+                disabled={saving}
+              >
+                Cancel
+              </button>
+            )}
           </form>
         </div>
       </div>
@@ -146,16 +231,36 @@ function Projects() {
               <div className="card h-100 shadow-sm">
                 <div className="card-body">
                   <h5 className="card-title">{project.name}</h5>
+
                   <p className="card-text text-muted">
                     {project.description || "No description provided."}
                   </p>
 
-                  <Link
-                    to={`/projects/${project._id}`}
-                    className="btn btn-outline-primary btn-sm"
-                  >
-                    View Project
-                  </Link>
+                  <div className="d-flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      className="btn btn-outline-primary btn-sm"
+                      onClick={() => navigate(`/projects/${project._id}`)}
+                    >
+                      View Project
+                    </button>
+
+                    <button
+                      type="button"
+                      className="btn btn-outline-warning btn-sm"
+                      onClick={() => handleEdit(project)}
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      type="button"
+                      className="btn btn-outline-danger btn-sm"
+                      onClick={() => handleDelete(project)}
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
