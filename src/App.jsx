@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
+import Projects from "./pages/Projects";
 import ProjectManagement from "./pages/ProjectManagement";
 import TeamManagement from "./pages/TeamManagement";
 import Reports from "./pages/Reports";
@@ -21,6 +22,8 @@ function App() {
         {/* Protected pages */}
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
+
+          <Route path="/projects" element={<Projects />} />
 
           <Route path="/projects/:projectId" element={<ProjectManagement />} />
 
