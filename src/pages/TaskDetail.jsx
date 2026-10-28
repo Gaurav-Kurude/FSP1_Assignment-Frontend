@@ -256,7 +256,9 @@ export default function TaskDetail() {
       <header className="task-detail-header">
         <div>
           <Link to="/dashboard" className="task-detail-breadcrumb">
-            Workasana<span>.</span>
+            <h3 className="sidebar-brand">
+              Workasana<span>.</span>
+            </h3>
           </Link>
 
           <h1>Task: {task.name}</h1>
