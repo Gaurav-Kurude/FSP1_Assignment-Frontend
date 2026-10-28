@@ -97,12 +97,10 @@ export default function Settings() {
 
       <main className="settings-page">
         <header className="settings-header">
-          <p>ACCOUNT</p>
-          <h1>Settings</h1>
-          <p>View your account information.</p>
+          <p>ACCOUNT SETTINGS</p>
+          <h1>My Profile</h1>
+          <p>View your account information below.</p>
         </header>
-
-        {error && <div className="settings-error">{error}</div>}
 
         <section className="settings-card">
           <div className="settings-avatar">
@@ -112,26 +110,24 @@ export default function Settings() {
           <h2>{user.name || "Name unavailable"}</h2>
           <p>{user.email || "Email unavailable"}</p>
 
-          <div className="settings-divider" />
+          <hr />
 
           <div className="settings-info">
             <div>
               <span>Full Name</span>
               <strong>{user.name || "Not available"}</strong>
             </div>
+
             <div>
               <span>Email Address</span>
               <strong>{user.email || "Not available"}</strong>
             </div>
+
             <div>
               <span>User ID</span>
               <strong>{user.id || user._id || "Not available"}</strong>
             </div>
           </div>
-
-          <p className="settings-note">
-            Your account details are displayed here.
-          </p>
         </section>
       </main>
     </div>
