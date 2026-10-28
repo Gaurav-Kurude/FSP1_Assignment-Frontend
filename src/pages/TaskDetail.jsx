@@ -380,9 +380,9 @@ export default function TaskDetail() {
               </strong>
             </div>
 
-            {/* Remaining time */}
+            {/* Status */}
             <div className="task-detail-field">
-              <span>Time Remaining</span>
+              <span>Status</span>
 
               <strong>
                 {task.status === "Completed"
