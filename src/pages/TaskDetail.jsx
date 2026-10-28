@@ -8,14 +8,17 @@ const API_URL = "https://fsp-1-assignment-backend-plum.vercel.app";
 function getItems(data, key) {
   if (Array.isArray(data)) return data;
   if (Array.isArray(data?.[key])) return data[key];
+  if (Array.isArray(data?.data)) return data.data;
   return [];
 }
 
 function getId(value) {
   if (!value) return "";
+
   if (typeof value === "object") {
     return String(value._id || value.id || "");
   }
+
   return String(value);
 }
 
@@ -28,6 +31,30 @@ function getName(value, items, fallback = "Not available") {
 
   const found = items.find((item) => getId(item) === String(value));
   return found?.name || found?.email || fallback;
+}
+
+function formatDate(value) {
+  if (!value) return null;
+
+  // Handle a date-only value without shifting the calendar date
+  // because of timezone conversion.
+  if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    const [year, month, day] = value.split("-").map(Number);
+    const date = new Date(year, month - 1, day);
+
+    if (
+      date.getFullYear() !== year ||
+      date.getMonth() !== month - 1 ||
+      date.getDate() !== day
+    ) {
+      return null;
+    }
+
+    return date;
+  }
+
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
 }
 
 export default function TaskDetail() {
@@ -103,6 +130,7 @@ export default function TaskDetail() {
         "Fetch task details error:",
         err.response?.data || err.message,
       );
+
       setError(
         err.response?.data?.message ||
           "Unable to load task details. Please check your backend API.",
@@ -131,8 +159,6 @@ export default function TaskDetail() {
         return;
       }
 
-      // Send only the field being changed. Sending the entire populated task
-      // can include unsupported fields such as _id, createdAt, and updatedAt.
       const response = await axios.post(
         `${API_URL}/tasks/${taskId}`,
         { status: "Completed" },
@@ -144,16 +170,24 @@ export default function TaskDetail() {
         },
       );
 
-      // The backend has confirmed the update, so update the displayed status.
+      // Use the returned task so the displayed data stays in sync.
       setTask((currentTask) =>
-        currentTask ? { ...currentTask, status: "Completed" } : currentTask,
+        currentTask
+          ? {
+              ...currentTask,
+              ...(response.data?.task || {}),
+              status: "Completed",
+            }
+          : currentTask,
       );
+
       setSuccess(response.data?.message || "Task marked as completed.");
     } catch (err) {
       console.error(
         "Mark task complete error:",
         err.response?.data || err.message,
       );
+
       setError(
         err.response?.data?.message ||
           "Unable to update the task status. Please try again.",
@@ -177,6 +211,7 @@ export default function TaskDetail() {
         <div className="alert alert-danger" role="alert">
           {error || "Task not found."}
         </div>
+
         <button
           type="button"
           className="btn btn-outline-secondary"
@@ -198,12 +233,23 @@ export default function TaskDetail() {
     getName(tag, tags, typeof tag === "string" ? tag : "Tag"),
   );
 
-  const dueDate = task.dueDate ? new Date(task.dueDate) : null;
-  const validDueDate = dueDate && !Number.isNaN(dueDate.getTime());
+  // Read the saved due date from the task returned by the backend.
+  const dueDate = formatDate(task.dueDate);
 
-  const daysRemaining = validDueDate
-    ? Math.ceil((dueDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
-    : null;
+  // Compare calendar days to avoid incorrect results caused by
+  // the current time of day.
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const dueDateDay = dueDate ? new Date(dueDate) : null;
+  dueDateDay?.setHours(0, 0, 0, 0);
+
+  const daysRemaining =
+    dueDateDay && !Number.isNaN(dueDateDay.getTime())
+      ? Math.round(
+          (dueDateDay.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
+        )
+      : null;
 
   return (
     <div className="task-detail-page">
@@ -212,6 +258,7 @@ export default function TaskDetail() {
           <Link to="/dashboard" className="task-detail-breadcrumb">
             Dashboard
           </Link>
+
           <h1>Task: {task.name}</h1>
           <p>View and manage your task details.</p>
         </div>
@@ -304,6 +351,7 @@ export default function TaskDetail() {
 
             <div className="task-detail-field">
               <span>Tags</span>
+
               <div className="task-detail-tags">
                 {tagNames.length ? (
                   tagNames.map((tag, index) => (
@@ -317,10 +365,12 @@ export default function TaskDetail() {
               </div>
             </div>
 
+            {/* Due date */}
             <div className="task-detail-field">
               <span>Due Date</span>
+
               <strong>
-                {validDueDate
+                {dueDate
                   ? dueDate.toLocaleDateString("en-IN", {
                       day: "numeric",
                       month: "short",
@@ -330,8 +380,10 @@ export default function TaskDetail() {
               </strong>
             </div>
 
+            {/* Remaining time */}
             <div className="task-detail-field">
               <span>Time Remaining</span>
+
               <strong>
                 {task.status === "Completed"
                   ? "Completed"
@@ -347,6 +399,7 @@ export default function TaskDetail() {
 
             <div className="task-detail-field">
               <span>Created On</span>
+
               <strong>
                 {task.createdAt
                   ? new Date(task.createdAt).toLocaleDateString("en-IN")
