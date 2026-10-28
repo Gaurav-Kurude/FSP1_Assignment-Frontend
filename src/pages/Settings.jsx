@@ -93,7 +93,7 @@ export default function Settings() {
             <p className="user-role">{user.email || "Email unavailable"}</p>
           </div>
 
-          <button className="sidebar-logout-button" onClick={handleLogout}>
+          <button className="btn btn-outline-secondary" onClick={handleLogout}>
             Logout
           </button>
         </div>
