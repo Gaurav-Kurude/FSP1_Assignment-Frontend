@@ -84,14 +84,21 @@ export default function Settings() {
         </nav>
 
         <div className="sidebar-bottom">
-          <div className="user-avatar">
-            {(user.name || "U").charAt(0).toUpperCase()}
-          </div>
+          <div className="user-avatar">{getInitials(user?.name)}</div>
+
           <div>
-            <strong>{user.name || "User"}</strong>
-            <p>{user.email || "Email unavailable"}</p>
+            <p className="user-name">{user?.name || "User"}</p>
+            <p className="user-role">Team Member</p>
           </div>
-          <button onClick={handleLogout}>Logout</button>
+
+          <button
+            type="button"
+            className="btn btn-outline-secondary btn-sm ms-auto"
+            onClick={handleLogout}
+            title="Logout"
+          >
+            Logout
+          </button>
         </div>
       </aside>
 
