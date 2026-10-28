@@ -1,15 +1,22 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import "../App.css";
 
 const API_URL = "https://fsp-1-assignment-backend-plum.vercel.app";
 
 function Dashboard() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+
+  // Read filters from the URL
+  const statusFilter = searchParams.get("status") || "All Tasks";
+  const teamFilter = searchParams.get("team") || "";
+  const ownerFilter = searchParams.get("owner") || "";
 
   const [projects, setProjects] = useState([]);
   const [tasks, setTasks] = useState([]);
+
   const [user, setUser] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem("user") || "null");
@@ -18,12 +25,12 @@ function Dashboard() {
     }
   });
 
-  const [activeFilter, setActiveFilter] = useState("All Tasks");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [completingTaskId, setCompletingTaskId] = useState(null);
   const [taskActionMessage, setTaskActionMessage] = useState("");
 
+  // Fetch dashboard data
   useEffect(() => {
     const fetchDashboardData = async () => {
       const token = localStorage.getItem("token");
@@ -50,12 +57,8 @@ function Dashboard() {
             axios.get(`${API_URL}/auth/me`, config),
           ]);
 
-        const fetchedProjects = projectsResponse.data.projects || [];
-
-        const fetchedTasks = tasksResponse.data.tasks || [];
-
-        setProjects(fetchedProjects);
-        setTasks(fetchedTasks);
+        setProjects(projectsResponse.data.projects || []);
+        setTasks(tasksResponse.data.tasks || []);
 
         const currentUser = userResponse.data.user;
 
@@ -86,7 +89,20 @@ function Dashboard() {
     fetchDashboardData();
   }, [navigate]);
 
-  // Get tasks assigned to the currently logged-in user.
+  // Update URL when a status filter is selected
+  const handleStatusChange = (selectedStatus) => {
+    const newParams = new URLSearchParams(searchParams);
+
+    if (selectedStatus === "All Tasks") {
+      newParams.delete("status");
+    } else {
+      newParams.set("status", selectedStatus);
+    }
+
+    setSearchParams(newParams);
+  };
+
+  // Get tasks assigned to the logged-in user
   const userId = user?.id || user?._id;
 
   const myTasks = tasks.filter((task) =>
@@ -97,11 +113,28 @@ function Dashboard() {
     }),
   );
 
-  const filteredTasks =
-    activeFilter === "All Tasks"
-      ? myTasks
-      : myTasks.filter((task) => task.status === activeFilter);
+  // Apply status, team, and owner filters from the URL
+  const filteredTasks = myTasks.filter((task) => {
+    const matchesStatus =
+      statusFilter === "All Tasks" || task.status === statusFilter;
 
+    const taskTeamId =
+      typeof task.team === "string" ? task.team : task.team?._id;
+
+    const matchesTeam = !teamFilter || String(taskTeamId || "") === teamFilter;
+
+    const matchesOwner =
+      !ownerFilter ||
+      (task.owners || []).some((owner) => {
+        const id = typeof owner === "string" ? owner : owner?._id;
+
+        return id && String(id) === ownerFilter;
+      });
+
+    return matchesStatus && matchesTeam && matchesOwner;
+  });
+
+  // Generate user initials
   const getInitials = (name) => {
     if (!name) return "U";
 
@@ -114,6 +147,7 @@ function Dashboard() {
       .toUpperCase();
   };
 
+  // Mark a task as completed
   const handleMarkComplete = async (taskId) => {
     const token = localStorage.getItem("token");
 
@@ -136,18 +170,19 @@ function Dashboard() {
         },
       );
 
-      // Update the dashboard immediately after the API succeeds.
       setTasks((currentTasks) =>
         currentTasks.map((task) =>
           task._id === taskId ? { ...task, status: "Completed" } : task,
         ),
       );
+
       setTaskActionMessage("Task marked as completed.");
     } catch (err) {
       console.error(
         "Mark task complete error:",
         err.response?.data || err.message,
       );
+
       setTaskActionMessage(
         err.response?.data?.message ||
           "Unable to mark this task as complete. Please try again.",
@@ -157,6 +192,7 @@ function Dashboard() {
     }
   };
 
+  // Logout
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -246,6 +282,7 @@ function Dashboard() {
         {error && (
           <div className="alert alert-danger" role="alert">
             {error}
+
             <button
               type="button"
               className="btn btn-sm btn-outline-danger ms-3"
@@ -261,6 +298,7 @@ function Dashboard() {
             <div className="spinner-border text-primary" role="status">
               <span className="visually-hidden">Loading...</span>
             </div>
+
             <p className="mt-3">Loading your dashboard...</p>
           </div>
         ) : (
@@ -353,9 +391,10 @@ function Dashboard() {
                     type="button"
                     key={filter}
                     className={`filter-button ${
-                      activeFilter === filter ? "filter-active" : ""
+                      statusFilter === filter ? "filter-active" : ""
                     }`}
-                    onClick={() => setActiveFilter(filter)}
+                    onClick={() => handleStatusChange(filter)}
+                    aria-pressed={statusFilter === filter}
                   >
                     {filter}
                   </button>
@@ -367,6 +406,7 @@ function Dashboard() {
                 {filteredTasks.length > 0 ? (
                   filteredTasks.map((task) => {
                     const owners = task.owners || [];
+
                     const ownerNames = owners
                       .map((owner) =>
                         typeof owner === "string" ? "" : owner?.name || "",
@@ -422,10 +462,11 @@ function Dashboard() {
                 ) : (
                   <div className="empty-tasks">
                     <h3>No tasks found</h3>
+
                     <p>
-                      {activeFilter === "All Tasks"
+                      {statusFilter === "All Tasks"
                         ? "No tasks are assigned to you yet."
-                        : `No tasks with status "${activeFilter}" are assigned to you.`}
+                        : `No tasks with status "${statusFilter}" are assigned to you.`}
                     </p>
                   </div>
                 )}
