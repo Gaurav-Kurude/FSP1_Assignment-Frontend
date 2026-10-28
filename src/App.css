@@ -1718,7 +1718,7 @@
 }
 
 .sidebar-logout-button:hover {
-  background: #f0efff;
-  color: #635bff;
-  border-color: #d9d5ff;
+  background: #4a4a4a;
+  color: #f4f4f8;
+  border-color: #4a4a4a;
 }
