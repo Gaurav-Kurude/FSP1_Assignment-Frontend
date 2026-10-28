@@ -121,7 +121,7 @@ function CreateTaskModal({ projectId, projectName, onClose, onTaskCreated }) {
         owners: formData.owners,
         tags: formData.tags,
         timeToComplete,
-        status: "To Do",
+        status: formData.status,
         dueDate: formData.dueDate || null,
       };
 
