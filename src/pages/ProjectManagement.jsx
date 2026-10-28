@@ -186,6 +186,11 @@ function ProjectManagement() {
           <Link to="/reports" className="sidebar-link">
             <span>▥</span> Reports
           </Link>
+
+          <Link to="/settings" className="sidebar-link">
+            <span>⚙</span>
+            Settings
+          </Link>
         </nav>
       </aside>
 
