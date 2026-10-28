@@ -1679,3 +1679,46 @@
     padding: 22px;
   }
 }
+
+/* Settings sidebar user information */
+.sidebar-bottom {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sidebar-user-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.sidebar-user-info .user-name {
+  margin: 0 0 4px;
+  color: #20243a;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.sidebar-user-info .user-role {
+  margin: 0;
+  color: #777c91;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.sidebar-logout-button {
+  flex-shrink: 0;
+  padding: 7px 10px;
+  border: 1px solid #e9eaf0;
+  border-radius: 7px;
+  background: #fff;
+  color: #777c91;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.sidebar-logout-button:hover {
+  background: #f0efff;
+  color: #635bff;
+  border-color: #d9d5ff;
+}
