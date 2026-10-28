@@ -16,6 +16,7 @@ function CreateTaskModal({ projectId, projectName, onClose, onTaskCreated }) {
     tags: [],
     dueDate: "",
     timeToComplete: "",
+    status: "To Do",
   });
 
   const [loadingOptions, setLoadingOptions] = useState(true);
@@ -230,6 +231,26 @@ function CreateTaskModal({ projectId, projectName, onClose, onTaskCreated }) {
                     {team.name}
                   </option>
                 ))}
+              </select>
+            </div>
+
+            <div className="mb-3">
+              <label htmlFor="status" className="form-label">
+                Status
+              </label>
+
+              <select
+                id="status"
+                name="status"
+                className="form-select"
+                value={formData.status}
+                onChange={handleChange}
+                required
+              >
+                <option value="To Do">To Do</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Completed">Completed</option>
+                <option value="Blocked">Blocked</option>
               </select>
             </div>
 
