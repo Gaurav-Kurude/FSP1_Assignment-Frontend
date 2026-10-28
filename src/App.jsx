@@ -8,6 +8,7 @@ import ProjectManagement from "./pages/ProjectManagement";
 import TeamManagement from "./pages/TeamManagement";
 import Reports from "./pages/Reports";
 import TaskDetail from "./pages/TaskDetail";
+import Settings from "./pages/Settings";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -32,6 +33,8 @@ function App() {
           <Route path="/reports" element={<Reports />} />
 
           <Route path="/tasks/:taskId" element={<TaskDetail />} />
+
+          <Route path="/settings" element={<Settings />} />
         </Route>
 
         {/* Default route */}

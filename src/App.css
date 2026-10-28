@@ -1523,3 +1523,108 @@
 .task-detail-brand:hover {
   color: #1d4ed8;
 }
+
+.settings-page {
+  flex: 1;
+  min-width: 0;
+  padding: 36px;
+  background: #f8fafc;
+  min-height: 100vh;
+}
+
+.settings-header {
+  margin-bottom: 28px;
+}
+
+.settings-header h1 {
+  margin: 8px 0;
+  color: #172033;
+  font-size: 30px;
+}
+
+.settings-header p {
+  color: #64748b;
+}
+
+.settings-card {
+  max-width: 700px;
+  padding: 30px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+}
+
+.settings-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  margin-bottom: 18px;
+  border-radius: 50%;
+  background: #dbeafe;
+  color: #2563eb;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.settings-card h2 {
+  margin-bottom: 6px;
+  color: #172033;
+}
+
+.settings-card > p {
+  color: #64748b;
+}
+
+.settings-divider {
+  height: 1px;
+  margin: 24px 0;
+  background: #e2e8f0;
+}
+
+.settings-info {
+  display: grid;
+  gap: 20px;
+}
+
+.settings-info div {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  overflow-wrap: anywhere;
+}
+
+.settings-info span {
+  color: #64748b;
+  font-size: 14px;
+}
+
+.settings-info strong {
+  color: #172033;
+  font-weight: 600;
+}
+
+.settings-note {
+  margin-top: 24px;
+  font-size: 14px;
+}
+
+.settings-error {
+  margin-bottom: 20px;
+  padding: 12px;
+  color: #b91c1c;
+  background: #fee2e2;
+  border-radius: 8px;
+}
+
+@media (max-width: 768px) {
+  .settings-page {
+    padding: 20px;
+  }
+
+  .settings-card {
+    padding: 22px;
+  }
+}
