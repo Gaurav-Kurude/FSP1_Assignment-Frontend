@@ -1722,3 +1722,22 @@
   color: #f4f4f8;
   border-color: #555555;
 }
+
+.task-filter-select {
+  width: auto;
+  min-width: 180px;
+  max-width: 240px;
+}
+
+@media (max-width: 768px) {
+  .task-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .task-filter-select {
+    width: 100%;
+    max-width: 100%;
+  }
+}
