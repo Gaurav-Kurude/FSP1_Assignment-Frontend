@@ -153,12 +153,7 @@ function Dashboard() {
         return id && String(id) === ownerFilter;
       });
 
-    return (
-      matchesProject &&
-      matchesUrlStatus &&
-      matchesTeam &&
-      matchesOwner
-    );
+    return matchesProject && matchesUrlStatus && matchesTeam && matchesOwner;
   });
 
   // Generate user initials
@@ -236,12 +231,14 @@ function Dashboard() {
           <div>
             <p className="dashboard-subtitle">WORKSPACE OVERVIEW</p>
 
-            <h1>Dashboard</h1>
+            <div className="reports-title">
+              <h1>Dashboard</h1>
 
-            <p className="dashboard-description">
-              Welcome back, {user?.name || "User"}! Manage your projects and
-              keep track of your tasks.
-            </p>
+              <p className="dashboard-description">
+                Welcome back, {user?.name || "User"}! Manage your projects and
+                keep track of your tasks.
+              </p>
+            </div>
           </div>
 
           <button
