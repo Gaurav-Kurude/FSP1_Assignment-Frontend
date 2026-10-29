@@ -148,8 +148,8 @@ function Projects() {
 
       <main className="dashboard-main">
         <div className="container-fluid py-4">
-          {/* Back button and heading */}
-          <div className="mb-4">
+          {/* Centered page heading */}
+          <div className="projects-page-header mb-4">
             <h1>Projects</h1>
             <p className="text-muted">
               Create and manage your Workasana projects.

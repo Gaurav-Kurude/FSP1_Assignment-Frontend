@@ -1877,3 +1877,17 @@
     position: static;
   }
 }
+
+.projects-page-header {
+  width: 100%;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.projects-page-header h1 {
+  margin-bottom: 10px;
+}
+
+.projects-page-header p {
+  margin-bottom: 0;
+}
