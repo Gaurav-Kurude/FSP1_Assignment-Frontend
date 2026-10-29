@@ -3,6 +3,7 @@ Workasana is a task management application that helps users create and manage pr
 
 ---
 ## Demo Link
+
 [Live Demo](https://fsp-1-assignment-frontend-ten.vercel.app/)
 ---
 
@@ -28,6 +29,7 @@ npm run dev
 ## Demo Video
 Watch a walkthrough (3-5 minutes) of all the major features of this app:
 [Loom Video](https://drive.google.com/file/d/1Rkx6sdguaTn8TVRRXbmP5BFxRS0WCD4a/view?usp=sharing)
+
 ---
 
 ## Features
