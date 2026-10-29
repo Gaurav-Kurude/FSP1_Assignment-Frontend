@@ -1741,3 +1741,37 @@
     max-width: 100%;
   }
 }
+
+.team-management-page {
+  display: flex;
+  min-height: 100vh;
+}
+
+.team-management-main {
+  flex: 1;
+  margin-left: 260px; /* adjust to your Sidebar width */
+  padding: 24px 32px;
+  background: #f8fafc;
+}
+
+.team-management-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 32px;
+}
+
+.team-list-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.team-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+/* Keep your existing .team-card, .team-avatar, etc. styles */

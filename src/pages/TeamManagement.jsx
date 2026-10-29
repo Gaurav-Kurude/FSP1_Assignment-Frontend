@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../App.css";
 import Sidebar from "../components/Sidebar";
@@ -23,7 +23,6 @@ export default function TeamManagement() {
 
   const getConfig = () => {
     const token = localStorage.getItem("token");
-
     return {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -37,7 +36,6 @@ export default function TeamManagement() {
 
     try {
       const token = localStorage.getItem("token");
-
       if (!token) {
         navigate("/login");
         return;
@@ -45,9 +43,13 @@ export default function TeamManagement() {
 
       const response = await axios.get(`${API_URL}/teams`, getConfig());
 
+      // Handle common response shapes from the backend
       const teamData = Array.isArray(response.data)
         ? response.data
-        : response.data?.teams || response.data?.data || [];
+        : response.data?.teams ||
+          response.data?.data ||
+          response.data?.result ||
+          [];
 
       setTeams(teamData);
     } catch (err) {
@@ -66,9 +68,8 @@ export default function TeamManagement() {
 
   const handleChange = (event) => {
     const { name, value } = event.target;
-
-    setFormData((previous) => ({
-      ...previous,
+    setFormData((prev) => ({
+      ...prev,
       [name]: value,
     }));
   };
@@ -95,19 +96,17 @@ export default function TeamManagement() {
         getConfig(),
       );
 
-      const createdTeam = response.data?.team || response.data?.data;
+      // Prefer the returned team object; otherwise re-fetch
+      const createdTeam =
+        response.data?.team || response.data?.data || response.data;
 
-      if (createdTeam?._id) {
-        setTeams((previous) => [...previous, createdTeam]);
+      if (createdTeam && (createdTeam._id || createdTeam.id)) {
+        setTeams((prev) => [...prev, createdTeam]);
       } else {
         await fetchTeams();
       }
 
-      setFormData({
-        name: "",
-        description: "",
-      });
-
+      setFormData({ name: "", description: "" });
       setShowForm(false);
       setSuccess("Team created successfully.");
     } catch (err) {
@@ -123,42 +122,28 @@ export default function TeamManagement() {
   return (
     <div className="team-management-page">
       <Sidebar />
-      <header className="team-management-header">
-        <div>
-          <p className="team-eyebrow">WORKASANA / ORGANIZATION</p>
-          <h1>Teams Management</h1>
-          <p>Manage your teams and keep everyone organized.</p>
-        </div>
 
-        <button
-          className="btn btn-primary team-add-button"
-          onClick={() => {
-            setError("");
-            setSuccess("");
-            setShowForm((previous) => !previous);
-          }}
-        >
-          {showForm ? "Cancel" : "+ Add New Team"}
-        </button>
-      </header>
-
-      <div className="team-management-layout">
-        <aside className="team-management-sidebar">
-          <Link to="/dashboard" className="btn btn-outline-secondary w-100">
-            ← Back to Dashboard
-          </Link>
-
-          <div className="team-sidebar-summary">
-            <span>Total Teams</span>
-            <strong>{teams.length}</strong>
+      <div className="team-management-main">
+        {/* Header */}
+        <header className="team-management-header">
+          <div>
+            <h1>Teams Management</h1>
+            <p>Manage your teams and keep everyone organized.</p>
           </div>
 
-          <div className="team-sidebar-summary">
-            <span>Management</span>
-            <strong>Teams</strong>
-          </div>
-        </aside>
+          <button
+            className="btn btn-primary"
+            onClick={() => {
+              setError("");
+              setSuccess("");
+              setShowForm((prev) => !prev);
+            }}
+          >
+            {showForm ? "Cancel" : "+ Add New Team"}
+          </button>
+        </header>
 
+        {/* Content */}
         <main className="team-management-content">
           {error && (
             <div className="alert alert-danger" role="alert">
@@ -172,6 +157,7 @@ export default function TeamManagement() {
             </div>
           )}
 
+          {/* Add Team Form */}
           {showForm && (
             <section className="team-form-card">
               <h2>Add a New Team</h2>
@@ -182,7 +168,6 @@ export default function TeamManagement() {
                   <label htmlFor="teamName" className="form-label">
                     Team Name *
                   </label>
-
                   <input
                     id="teamName"
                     type="text"
@@ -200,13 +185,12 @@ export default function TeamManagement() {
                   <label htmlFor="teamDescription" className="form-label">
                     Description
                   </label>
-
                   <textarea
                     id="teamDescription"
                     name="description"
                     className="form-control"
                     placeholder="What does this team work on?"
-                    rows="3"
+                    rows={3}
                     value={formData.description}
                     onChange={handleChange}
                     maxLength={500}
@@ -236,6 +220,7 @@ export default function TeamManagement() {
             </section>
           )}
 
+          {/* List heading + Refresh */}
           <div className="team-list-heading">
             <div>
               <h2>Teams List</h2>
@@ -251,6 +236,7 @@ export default function TeamManagement() {
             </button>
           </div>
 
+          {/* Loading / Empty / Cards */}
           {loading ? (
             <div className="team-empty-state">Loading teams...</div>
           ) : teams.length === 0 ? (
@@ -258,7 +244,6 @@ export default function TeamManagement() {
               <div className="team-empty-icon">👥</div>
               <h3>No teams yet</h3>
               <p>Create your first team to get started.</p>
-
               <button
                 className="btn btn-primary"
                 onClick={() => setShowForm(true)}
@@ -269,12 +254,11 @@ export default function TeamManagement() {
           ) : (
             <div className="team-card-grid">
               {teams.map((team) => (
-                <article className="team-card" key={team._id}>
+                <article className="team-card" key={team._id || team.id}>
                   <div className="team-card-top">
                     <div className="team-avatar">
                       {(team.name || "T").trim().charAt(0).toUpperCase()}
                     </div>
-
                     <span className="team-card-label">TEAM</span>
                   </div>
 
