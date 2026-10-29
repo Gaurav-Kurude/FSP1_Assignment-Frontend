@@ -331,7 +331,7 @@ export default function Reports() {
       <main className="dashboard-main reports-page">
         <div className="container-fluid py-4">
           <div className="reports-header">
-            <div>
+            <div className="reports-title">
               <h1>Workasana Reports</h1>
               <p>Track completed tasks and monitor pending work.</p>
             </div>
