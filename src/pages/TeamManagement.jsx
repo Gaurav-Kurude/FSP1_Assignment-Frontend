@@ -126,7 +126,7 @@ export default function TeamManagement() {
       <div className="team-management-main">
         {/* Header */}
         <header className="team-management-header">
-          <div>
+          <div className="team-management-title">
             <h1>Teams Management</h1>
             <p>Manage your teams and keep everyone organized.</p>
           </div>
