@@ -1829,3 +1829,51 @@
     width: 100%;
   }
 }
+
+.dashboard-header {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 32px;
+  min-height: 130px;
+}
+
+.dashboard-title {
+  flex: 1;
+  text-align: center;
+}
+
+.dashboard-title h1 {
+  margin-bottom: 12px;
+}
+
+.dashboard-title .dashboard-subtitle {
+  margin-bottom: 8px;
+}
+
+.dashboard-title .dashboard-description {
+  margin-bottom: 0;
+}
+
+.dashboard-header .add-task-button {
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+@media (max-width: 768px) {
+  .dashboard-header {
+    flex-direction: column;
+    gap: 16px;
+    min-height: auto;
+  }
+
+  .dashboard-title {
+    width: 100%;
+  }
+
+  .dashboard-header .add-task-button {
+    position: static;
+  }
+}

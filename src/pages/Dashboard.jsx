@@ -228,17 +228,15 @@ function Dashboard() {
       {/* Main Content */}
       <main className="dashboard-main">
         <header className="dashboard-header">
-          <div>
+          <div className="dashboard-title">
             <p className="dashboard-subtitle">WORKSPACE OVERVIEW</p>
 
-            <div className="reports-title">
-              <h1>Dashboard</h1>
+            <h1>Dashboard</h1>
 
-              <p className="dashboard-description">
-                Welcome back, {user?.name || "User"}! Manage your projects and
-                keep track of your tasks.
-              </p>
-            </div>
+            <p className="dashboard-description">
+              Welcome back, {user?.name || "User"}! Manage your projects and
+              keep track of your tasks.
+            </p>
           </div>
 
           <button
