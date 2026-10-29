@@ -138,17 +138,19 @@ function Projects() {
 
   return (
     <div className="container py-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
+      <div className="mb-4">
+        <div className="mb-3">
+          <Link to="/dashboard" className="btn btn-outline-secondary">
+            ← Back to Dashboard
+          </Link>
+        </div>
+
         <div>
           <h1>Projects</h1>
           <p className="text-muted">
             Create and manage your Workasana projects.
           </p>
         </div>
-
-        <Link to="/dashboard" className="btn btn-outline-secondary">
-          Back to Dashboard
-        </Link>
       </div>
 
       {error && <div className="alert alert-danger">{error}</div>}
