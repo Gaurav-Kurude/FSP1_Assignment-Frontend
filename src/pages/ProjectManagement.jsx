@@ -167,8 +167,8 @@ function ProjectManagement() {
       <Sidebar />
 
       <main className="project-main">
-        <Link to="/dashboard" className="project-back-link">
-          ← Back to Dashboard
+        <Link to="/projects" className="project-back-link">
+          ← Back to Projects
         </Link>
 
         {error && (
