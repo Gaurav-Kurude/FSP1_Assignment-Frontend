@@ -133,12 +133,6 @@ function Dashboard() {
     const matchesProject =
       !selectedProject || String(taskProjectId || "") === selectedProject;
 
-    // Apply the status selected in the dropdown
-    const matchesSelectedStatus =
-      !selectedStatus ||
-      selectedStatus === "All Tasks" ||
-      task.status === selectedStatus;
-
     // Preserve the existing URL status filter
     const matchesUrlStatus =
       statusFilter === "All Tasks" || task.status === statusFilter;
@@ -160,7 +154,6 @@ function Dashboard() {
 
     return (
       matchesProject &&
-      matchesSelectedStatus &&
       matchesUrlStatus &&
       matchesTeam &&
       matchesOwner
@@ -440,27 +433,6 @@ function Dashboard() {
                   <option value="Completed">Completed</option>
                   <option value="Blocked">Blocked</option>
                 </select>
-
-                {/* Existing status buttons */}
-                {[
-                  "All Tasks",
-                  "To Do",
-                  "In Progress",
-                  "Completed",
-                  "Blocked",
-                ].map((filter) => (
-                  <button
-                    type="button"
-                    key={filter}
-                    className={`filter-button ${
-                      statusFilter === filter ? "filter-active" : ""
-                    }`}
-                    onClick={() => handleStatusChange(filter)}
-                    aria-pressed={statusFilter === filter}
-                  >
-                    {filter}
-                  </button>
-                ))}
               </div>
 
               {/* Task List */}
