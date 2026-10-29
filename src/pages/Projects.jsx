@@ -150,12 +150,6 @@ function Projects() {
         <div className="container-fluid py-4">
           {/* Back button and heading */}
           <div className="mb-4">
-            <div className="mb-3">
-              <Link to="/dashboard" className="btn btn-outline-secondary">
-                ← Back to Dashboard
-              </Link>
-            </div>
-
             <h1>Projects</h1>
             <p className="text-muted">
               Create and manage your Workasana projects.
