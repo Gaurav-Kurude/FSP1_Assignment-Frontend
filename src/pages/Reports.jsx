@@ -332,10 +332,6 @@ export default function Reports() {
         <div className="container-fluid py-4">
           <div className="reports-header">
             <div>
-              <Link to="/dashboard" className="btn btn-outline-secondary mb-3">
-                ← Back to Dashboard
-              </Link>
-
               <h1>Workasana Reports</h1>
               <p>Track completed tasks and monitor pending work.</p>
             </div>
