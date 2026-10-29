@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../App.css";
+import Sidebar from "../components/Sidebar";
 
 const API_URL = "https://fsp-1-assignment-backend-plum.vercel.app";
 
@@ -121,6 +122,7 @@ export default function TeamManagement() {
 
   return (
     <div className="team-management-page">
+      <Sidebar />
       <header className="team-management-header">
         <div>
           <p className="team-eyebrow">WORKASANA / ORGANIZATION</p>
