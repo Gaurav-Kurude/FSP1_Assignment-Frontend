@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import Sidebar from "../components/Sidebar";
 import axios from "axios";
+import Sidebar from "../components/Sidebar";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -25,37 +25,35 @@ ChartJS.register(
   Title,
 );
 
-const API_URL = "https://fsp-1-assignment-backend-plum.vercel.app";
+const API_URL = (
+  import.meta.env.VITE_API_URL ||
+  "https://fsp-1-assignment-backend-plum.vercel.app"
+).replace(/\/+$/, "");
 
-const chartOptions = {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: {
-      position: "bottom",
-    },
-    title: {
-      display: false,
-    },
-  },
-  scales: {
-    y: {
-      beginAtZero: true,
-      ticks: {
-        precision: 0,
-      },
-    },
-  },
-};
+// Safely extract the response payload.
+function getPayload(response) {
+  let data = response?.data;
+
+  // Handle APIs that return { success: true, data: ... }.
+  if (
+    data &&
+    !Array.isArray(data) &&
+    typeof data === "object" &&
+    data.data !== undefined
+  ) {
+    data = data.data;
+  }
+
+  return data;
+}
 
 function getArray(response) {
-  const data = response?.data;
+  const data = getPayload(response);
 
   if (Array.isArray(data)) return data;
   if (Array.isArray(data?.tasks)) return data.tasks;
   if (Array.isArray(data?.results)) return data.results;
   if (Array.isArray(data?.report)) return data.report;
-  if (Array.isArray(data?.data)) return data.data;
 
   return [];
 }
@@ -66,6 +64,14 @@ function getNumber(data, possibleKeys) {
 
     if (typeof value === "number" && Number.isFinite(value)) {
       return value;
+    }
+
+    if (typeof value === "string" && value.trim() !== "") {
+      const number = Number(value);
+
+      if (Number.isFinite(number)) {
+        return number;
+      }
     }
   }
 
@@ -141,6 +147,44 @@ function ReportCard({ title, description, children }) {
   );
 }
 
+const chartOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      position: "bottom",
+    },
+    title: {
+      display: false,
+    },
+  },
+  scales: {
+    y: {
+      beginAtZero: true,
+      ticks: {
+        precision: 0,
+      },
+    },
+  },
+};
+
+const doughnutOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      position: "bottom",
+    },
+    tooltip: {
+      callbacks: {
+        label(context) {
+          return `${context.label}: ${context.raw} days`;
+        },
+      },
+    },
+  },
+};
+
 export default function Reports() {
   const [lastWeekCount, setLastWeekCount] = useState(0);
   const [pendingDays, setPendingDays] = useState(0);
@@ -158,6 +202,10 @@ export default function Reports() {
 
       if (!token) {
         setError("Please log in to view reports.");
+        setLastWeekCount(0);
+        setPendingDays(0);
+        setTeamRows([]);
+        setOwnerRows([]);
         return;
       }
 
@@ -182,12 +230,12 @@ export default function Reports() {
 
       if (failedReports.length === results.length) {
         throw new Error(
-          "Unable to load reports. Check your backend APIs and login token.",
+          "Unable to load reports. Please check your login token and backend report routes.",
         );
       }
 
       if (lastWeekResult.status === "fulfilled") {
-        const data = lastWeekResult.value.data;
+        const data = getPayload(lastWeekResult.value);
 
         setLastWeekCount(
           getNumber(data, [
@@ -195,6 +243,7 @@ export default function Reports() {
             "total",
             "totalCompleted",
             "completedCount",
+            "completedTasks",
           ]) || getArray(lastWeekResult.value).length,
         );
       } else {
@@ -202,9 +251,16 @@ export default function Reports() {
       }
 
       if (pendingResult.status === "fulfilled") {
-        const data = pendingResult.value.data;
+        const data = getPayload(pendingResult.value);
 
-        setPendingDays(getNumber(data, ["totalPendingDays"]));
+        setPendingDays(
+          getNumber(data, [
+            "totalPendingDays",
+            "pendingDays",
+            "total",
+            "count",
+          ]),
+        );
       } else {
         setPendingDays(0);
       }
@@ -223,11 +279,17 @@ export default function Reports() {
 
       if (failedReports.length > 0) {
         setError(
-          "Some reports could not be loaded. Check the failed report API in your backend.",
+          "Some reports could not be loaded. Check the failed API routes in your backend.",
         );
       }
     } catch (err) {
-      setError(err.message || "Something went wrong while loading reports.");
+      console.error("Error fetching reports:", err);
+
+      setError(
+        err.response?.data?.message ||
+          err.message ||
+          "Something went wrong while loading reports.",
+      );
     } finally {
       setLoading(false);
     }
@@ -237,18 +299,6 @@ export default function Reports() {
     fetchReports();
   }, [fetchReports]);
 
-  const pendingChartData = {
-    labels: ["Estimated pending days"],
-    datasets: [
-      {
-        label: "Days",
-        data: [pendingDays],
-        backgroundColor: ["#f5b544"],
-        borderRadius: 8,
-      },
-    ],
-  };
-
   const lastWeekChartData = {
     labels: ["Completed tasks"],
     datasets: [
@@ -256,44 +306,49 @@ export default function Reports() {
         label: "Tasks completed",
         data: [lastWeekCount],
         backgroundColor: ["#41b883"],
-        borderRadius: 8,
+        borderRadius: 6,
+        borderWidth: 0,
       },
     ],
   };
 
-  const pendingChartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: "bottom",
+  const pendingChartData = {
+    labels: ["Estimated pending days"],
+    datasets: [
+      {
+        label: "Estimated days",
+        data: [pendingDays],
+        backgroundColor: ["#f5b544"],
+        borderWidth: 0,
       },
-    },
+    ],
   };
 
   return (
-    <div className="reports-page">
+    <div className="dashboard-layout">
       <Sidebar />
-      <header className="reports-header">
-        <div>
-          <h1>Workasana Reports</h1>
-          <p>Track completed tasks and monitor pending work.</p>
-        </div>
 
-        <button
-          className="btn btn-outline-primary"
-          onClick={fetchReports}
-          disabled={loading}
-        >
-          {loading ? "Refreshing..." : "↻ Refresh Reports"}
-        </button>
-      </header>
+      <main className="dashboard-main reports-page">
+        <div className="container-fluid py-4">
+          <div className="reports-header">
+            <div>
+              <Link to="/dashboard" className="btn btn-outline-secondary mb-3">
+                ← Back to Dashboard
+              </Link>
 
-      <div className="reports-layout">
-        <aside className="reports-sidebar">
-          <Link to="/dashboard" className="btn btn-outline-secondary w-100">
-            ← Back to Dashboard
-          </Link>
+              <h1>Workasana Reports</h1>
+              <p>Track completed tasks and monitor pending work.</p>
+            </div>
+
+            <button
+              type="button"
+              className="btn btn-outline-primary"
+              onClick={fetchReports}
+              disabled={loading}
+            >
+              {loading ? "Refreshing..." : "↻ Refresh Reports"}
+            </button>
+          </div>
 
           <nav className="reports-navigation">
             <a href="#last-week">Work Done Last Week</a>
@@ -301,17 +356,15 @@ export default function Reports() {
             <a href="#team-report">Tasks by Team</a>
             <a href="#owner-report">Tasks by Owner</a>
           </nav>
-        </aside>
 
-        <main className="reports-main">
           {error && (
-            <div className="alert alert-warning" role="alert">
+            <div className="alert alert-warning mt-3" role="alert">
               {error}
             </div>
           )}
 
           {loading ? (
-            <p>Loading reports...</p>
+            <p className="mt-4">Loading reports...</p>
           ) : (
             <>
               <div className="report-summary-grid">
@@ -343,10 +396,16 @@ export default function Reports() {
                     title="Total Work Pending"
                     description="Estimated days for tasks not yet completed."
                   >
-                    <Doughnut
-                      data={pendingChartData}
-                      options={pendingChartOptions}
-                    />
+                    {pendingDays > 0 ? (
+                      <Doughnut
+                        data={pendingChartData}
+                        options={doughnutOptions}
+                      />
+                    ) : (
+                      <p className="report-empty">
+                        No estimated pending days available.
+                      </p>
+                    )}
                   </ReportCard>
                 </div>
 
@@ -388,8 +447,8 @@ export default function Reports() {
               </div>
             </>
           )}
-        </main>
-      </div>
+        </div>
+      </main>
     </div>
   );
 }
