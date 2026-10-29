@@ -325,8 +325,8 @@ function ProjectManagement() {
                     onChange={(event) => setSortBy(event.target.value)}
                   >
                     <option value="default">Default</option>
-                    <option value="time-asc">Shortest First</option>
-                    <option value="time-desc">Longest First</option>
+                    <option value="time-asc">Least Time Required</option>
+                    <option value="time-desc">Most Time Required</option>
                   </select>
                 </div>
               </div>
