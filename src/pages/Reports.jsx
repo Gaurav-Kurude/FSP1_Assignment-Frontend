@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import Sidebar from "../components/Sidebar";
 import axios from "axios";
 import {
   Chart as ChartJS,
@@ -272,6 +273,7 @@ export default function Reports() {
 
   return (
     <div className="reports-page">
+      <Sidebar />
       <header className="reports-header">
         <div>
           <h1>Workasana Reports</h1>

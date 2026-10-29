@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import Sidebar from "../components/Sidebar";
 import axios from "axios";
 import "../App.css";
 
@@ -227,54 +228,7 @@ function Dashboard() {
 
   return (
     <div className="dashboard-layout">
-      {/* Sidebar */}
-      <aside className="dashboard-sidebar">
-        <h3 className="sidebar-brand">
-          Workasana<span>.</span>
-        </h3>
-
-        <p className="sidebar-label">WORKSPACE</p>
-
-        <nav className="sidebar-nav">
-          <Link to="/dashboard" className="sidebar-link active">
-            <span>▦</span> Dashboard
-          </Link>
-
-          <Link to="/projects" className="sidebar-link">
-            <span>▤</span> Projects
-          </Link>
-
-          <Link to="/teams" className="sidebar-link">
-            <span>♧</span> Team Management
-          </Link>
-
-          <Link to="/reports" className="sidebar-link">
-            <span>▥</span> Reports
-          </Link>
-
-          <Link to="/settings" className="sidebar-link">
-            <span>⚙</span> Settings
-          </Link>
-        </nav>
-
-        <div className="sidebar-bottom">
-          <div className="user-avatar">{getInitials(user?.name)}</div>
-
-          <div>
-            <p className="user-name">{user?.name || "User"}</p>
-            <p className="user-role">Team Member</p>
-          </div>
-
-          <button
-            type="button"
-            className="btn btn-outline-secondary btn-sm ms-auto"
-            onClick={handleLogout}
-            title="Logout"
-          >
-            Logout
-          </button>
-        </div>
-      </aside>
+      <Sidebar />
 
       {/* Main Content */}
       <main className="dashboard-main">

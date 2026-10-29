@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import axios from "axios";
 import CreateTaskModal from "../components/CreateTaskModal";
 import "../App.css";
+import Sidebar from "../components/Sidebar";
 
 const API_URL = "https://fsp-1-assignment-backend-plum.vercel.app";
 
@@ -163,36 +164,7 @@ function ProjectManagement() {
 
   return (
     <div className="project-page">
-      <aside className="project-sidebar">
-        <h3 className="sidebar-brand">
-          Workasana<span>.</span>
-        </h3>
-
-        <p className="sidebar-label">WORKSPACE</p>
-
-        <nav className="sidebar-nav">
-          <Link to="/dashboard" className="sidebar-link">
-            <span>▦</span> Dashboard
-          </Link>
-
-          <Link to="/projects" className="sidebar-link active">
-            <span>▤</span> Projects
-          </Link>
-
-          <Link to="/teams" className="sidebar-link">
-            <span>♧</span> Teams
-          </Link>
-
-          <Link to="/reports" className="sidebar-link">
-            <span>▥</span> Reports
-          </Link>
-
-          <Link to="/settings" className="sidebar-link">
-            <span>⚙</span>
-            Settings
-          </Link>
-        </nav>
-      </aside>
+      <Sidebar />
 
       <main className="project-main">
         <Link to="/dashboard" className="project-back-link">
