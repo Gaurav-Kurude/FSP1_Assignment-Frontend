@@ -7,10 +7,13 @@ Workasana is a task management application that helps users create and manage pr
 ---
 
 ## Quick Start
+
+```
 git clone https://github.com/Gaurav-Kurude/Workasana<br>
 cd Workasana<br>
 npm install<br>
 npm run dev
+```
 ---
 
 ## Technologies
