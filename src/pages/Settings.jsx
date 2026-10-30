@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../App.css";
 import Sidebar from "../components/Sidebar";
@@ -8,6 +8,7 @@ const API_URL = "https://fsp-1-assignment-backend-plum.vercel.app";
 
 export default function Settings() {
   const navigate = useNavigate();
+
   const [user, setUser] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem("user")) || {};
@@ -15,6 +16,7 @@ export default function Settings() {
       return {};
     }
   });
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -35,6 +37,7 @@ export default function Settings() {
         });
 
         const userData = response.data.user || response.data;
+
         setUser(userData);
         localStorage.setItem("user", JSON.stringify(userData));
       } catch (err) {
@@ -47,66 +50,38 @@ export default function Settings() {
     fetchUser();
   }, [navigate]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    navigate("/login");
-  };
-
   if (loading) {
-    return <main className="settings-page">Loading user details...</main>;
+    return (
+      <main className="settings-page">
+        <div className="settings-loading">
+          <i className="bi bi-arrow-repeat"></i>
+          Loading user details...
+        </div>
+      </main>
+    );
   }
 
   return (
     <div className="dashboard-layout">
       <Sidebar />
-      <aside className="dashboard-sidebar">
-        <h3 className="sidebar-brand">
-          Workasana<span>.</span>
-        </h3>
-
-        <p className="sidebar-label">WORKSPACE</p>
-
-        <nav className="sidebar-nav">
-          <Link to="/dashboard" className="sidebar-link">
-            <span>▦</span> Dashboard
-          </Link>
-          <Link to="/projects" className="sidebar-link">
-            <span>▤</span> Projects
-          </Link>
-          <Link to="/teams" className="sidebar-link">
-            <span>♧</span> Team Management
-          </Link>
-          <Link to="/reports" className="sidebar-link">
-            <span>▥</span> Reports
-          </Link>
-          <Link to="/settings" className="sidebar-link active">
-            <span>⚙</span> Settings
-          </Link>
-        </nav>
-
-        <div className="sidebar-bottom">
-          <div className="user-avatar">
-            {(user.name || "U").charAt(0).toUpperCase()}
-          </div>
-
-          <div className="sidebar-user-info">
-            <p className="user-name">{user.name || "User"}</p>
-            <p className="user-role">{user.email || "Email unavailable"}</p>
-          </div>
-
-          <button className="sidebar-logout-button" onClick={handleLogout}>
-            Logout
-          </button>
-        </div>
-      </aside>
 
       <main className="settings-page">
         <header className="settings-header">
-          <p>ACCOUNT SETTINGS</p>
+          <p>
+            <i className="bi bi-gear"></i> ACCOUNT SETTINGS
+          </p>
+
           <h1>My Profile</h1>
+
           <p>View your account information below.</p>
         </header>
+
+        {error && (
+          <div className="settings-error">
+            <i className="bi bi-exclamation-circle"></i>
+            {error}
+          </div>
+        )}
 
         <section className="settings-card">
           <div className="settings-avatar">
@@ -114,23 +89,33 @@ export default function Settings() {
           </div>
 
           <h2>{user.name || "Name unavailable"}</h2>
-          <p>{user.email || "Email unavailable"}</p>
+
+          <p>
+            <i className="bi bi-envelope"></i>{" "}
+            {user.email || "Email unavailable"}
+          </p>
 
           <hr />
 
           <div className="settings-info">
             <div>
-              <span>Full Name</span>
+              <span>
+                <i className="bi bi-person"></i> Full Name
+              </span>
               <strong>{user.name || "Not available"}</strong>
             </div>
 
             <div>
-              <span>Email Address</span>
+              <span>
+                <i className="bi bi-envelope"></i> Email Address
+              </span>
               <strong>{user.email || "Not available"}</strong>
             </div>
 
             <div>
-              <span>User ID</span>
+              <span>
+                <i className="bi bi-fingerprint"></i> User ID
+              </span>
               <strong>{user.id || user._id || "Not available"}</strong>
             </div>
           </div>
