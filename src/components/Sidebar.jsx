@@ -1,118 +1,135 @@
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import { useState } from "react";
 
-function Sidebar() {
-  const location = useLocation();
+const Sidebar = () => {
   const navigate = useNavigate();
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
 
-  const links = [
-    { name: "Dashboard", path: "/dashboard", icon: "▦" },
-    { name: "Projects", path: "/projects", icon: "▤" },
-    { name: "Teams", path: "/teams", icon: "♧" },
-    { name: "Reports", path: "/reports", icon: "▥" },
-    { name: "Settings", path: "/settings", icon: "⚙" },
-  ];
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+  const userName = user.name || "User";
+  const teamName = user.team?.name || user.teamName || "Team Member";
 
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+
+    // Close the mobile menu if it is open
+    setIsMobileOpen(false);
+
     navigate("/login");
   };
 
-  return (
-    <>
-      {/* Mobile toggle button */}
-      <button
-        className="btn btn-primary mobile-menu-toggle"
-        type="button"
-        data-bs-toggle="offcanvas"
-        data-bs-target="#mobileSidebar"
-        aria-controls="mobileSidebar"
-      >
-        ☰ Menu
-      </button>
+  const closeMobileMenu = () => {
+    setIsMobileOpen(false);
+  };
 
-      {/* Mobile sidebar */}
-      <div
-        className="offcanvas offcanvas-start"
-        tabIndex="-1"
-        id="mobileSidebar"
-        aria-labelledby="mobileSidebarLabel"
-      >
-        <div className="offcanvas-header">
-          <h5 className="offcanvas-title" id="mobileSidebarLabel">
-            Workasana.
-          </h5>
+  const navigationLinks = [
+    { name: "Dashboard", path: "/dashboard", icon: "bi-speedometer2" },
+    { name: "Projects", path: "/projects", icon: "bi-folder" },
+    { name: "Teams", path: "/teams", icon: "bi-people" },
+    { name: "Reports", path: "/reports", icon: "bi-bar-chart" },
+    { name: "Settings", path: "/settings", icon: "bi-gear" },
+  ];
 
-          <button
-            type="button"
-            className="btn-close"
-            data-bs-dismiss="offcanvas"
-            aria-label="Close"
-          />
+  const renderNavigation = () => (
+    <nav className="sidebar-navigation">
+      {navigationLinks.map((link) => (
+        <NavLink
+          key={link.path}
+          to={link.path}
+          onClick={closeMobileMenu}
+          className={({ isActive }) =>
+            `sidebar-link ${isActive ? "active" : ""}`
+          }
+        >
+          <i className={`bi ${link.icon}`}></i>
+          <span>{link.name}</span>
+        </NavLink>
+      ))}
+    </nav>
+  );
+
+  const renderProfile = () => (
+    <div className="sidebar-bottom">
+      <div className="sidebar-profile">
+        <div className="profile-icon">
+          <i className="bi bi-person-fill"></i>
         </div>
 
-        <div className="offcanvas-body">
-          <nav className="nav flex-column gap-2">
-            {links.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                className={`nav-link ${
-                  location.pathname.startsWith(link.path) ? "active" : ""
-                }`}
-                data-bs-dismiss="offcanvas"
-              >
-                {link.icon} {link.name}
-              </Link>
-            ))}
-          </nav>
-
-          <button
-            className="btn btn-outline-danger mt-4 w-100"
-            onClick={handleLogout}
-          >
-            Logout
-          </button>
+        <div className="profile-details">
+          <p className="profile-name">{userName}</p>
+          <p className="profile-team">{teamName}</p>
         </div>
       </div>
 
+      <button type="button" className="sidebar-logout" onClick={handleLogout}>
+        <i className="bi bi-box-arrow-right"></i>
+        <span>Logout</span>
+      </button>
+    </div>
+  );
+
+  const renderSidebarContent = () => (
+    <>
+      <div className="sidebar-brand">
+        <span className="brand-icon">
+          <i className="bi bi-kanban-fill"></i>
+        </span>
+        <span>Workasana</span>
+      </div>
+
+      <div className="sidebar-section-label">MENU</div>
+
+      {renderNavigation()}
+
+      {renderProfile()}
+    </>
+  );
+
+  return (
+    <>
+      {/* Mobile menu toggle button */}
+      <button
+        type="button"
+        className="mobile-menu-toggle"
+        aria-label="Open navigation menu"
+        aria-expanded={isMobileOpen}
+        onClick={() => setIsMobileOpen(true)}
+      >
+        <i className="bi bi-list"></i>
+      </button>
+
       {/* Desktop sidebar */}
       <aside className="dashboard-sidebar desktop-sidebar">
-        <h3 className="sidebar-brand">
-          Workasana<span>.</span>
-        </h3>
+        {renderSidebarContent()}
+      </aside>
 
-        <p className="sidebar-label">WORKSPACE</p>
+      {/* Mobile sidebar overlay */}
+      {isMobileOpen && (
+        <div className="mobile-sidebar-overlay" onClick={closeMobileMenu}></div>
+      )}
 
-        <nav className="sidebar-nav">
-          {links.map((link) => {
-            const active =
-              link.path === "/projects"
-                ? location.pathname.startsWith("/projects")
-                : location.pathname === link.path;
-
-            return (
-              <Link
-                key={link.path}
-                to={link.path}
-                className={`sidebar-link ${active ? "active" : ""}`}
-              >
-                <span>{link.icon}</span>
-                {link.name}
-              </Link>
-            );
-          })}
-        </nav>
-
+      {/* Mobile sidebar */}
+      <aside
+        className={`dashboard-sidebar mobile-sidebar ${
+          isMobileOpen ? "mobile-sidebar-open" : ""
+        }`}
+        aria-hidden={!isMobileOpen}
+      >
         <button
-          className="btn btn-outline-danger mt-auto"
-          onClick={handleLogout}
+          type="button"
+          className="mobile-sidebar-close"
+          aria-label="Close navigation menu"
+          onClick={closeMobileMenu}
         >
-          Logout
+          <i className="bi bi-x-lg"></i>
         </button>
+
+        {renderSidebarContent()}
       </aside>
     </>
   );
-}
+};
 
 export default Sidebar;
