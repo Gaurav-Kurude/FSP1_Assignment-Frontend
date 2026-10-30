@@ -10,8 +10,9 @@ function Dashboard() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  // Read existing filters from the URL
+  // Read filters from the URL
   const statusFilter = searchParams.get("status") || "All Tasks";
+  const projectFilter = searchParams.get("project") || "";
   const teamFilter = searchParams.get("team") || "";
   const ownerFilter = searchParams.get("owner") || "";
 
@@ -19,8 +20,8 @@ function Dashboard() {
   const [projects, setProjects] = useState([]);
   const [tasks, setTasks] = useState([]);
 
-  // New project and status filters
-  const [selectedProject, setSelectedProject] = useState("");
+  // Filter values
+  const [selectedProject, setSelectedProject] = useState(projectFilter);
   const [selectedStatus, setSelectedStatus] = useState(statusFilter);
 
   const [user, setUser] = useState(() => {
@@ -36,10 +37,11 @@ function Dashboard() {
   const [completingTaskId, setCompletingTaskId] = useState(null);
   const [taskActionMessage, setTaskActionMessage] = useState("");
 
-  // Keep the status dropdown synchronized with URL filter changes
+  // Synchronize dropdowns when URL filters change
   useEffect(() => {
+    setSelectedProject(projectFilter);
     setSelectedStatus(statusFilter);
-  }, [statusFilter]);
+  }, [projectFilter, statusFilter]);
 
   // Fetch dashboard data
   useEffect(() => {
@@ -68,10 +70,13 @@ function Dashboard() {
             axios.get(`${API_URL}/auth/me`, config),
           ]);
 
-        setProjects(projectsResponse.data.projects || []);
-        setTasks(tasksResponse.data.tasks || []);
+        setProjects(
+          projectsResponse.data.projects || projectsResponse.data.data || [],
+        );
 
-        const currentUser = userResponse.data.user;
+        setTasks(tasksResponse.data.tasks || tasksResponse.data.data || []);
+
+        const currentUser = userResponse.data.user || userResponse.data;
 
         setUser(currentUser);
         localStorage.setItem("user", JSON.stringify(currentUser));
@@ -100,18 +105,17 @@ function Dashboard() {
     fetchDashboardData();
   }, [navigate]);
 
-  // Update URL when a status filter is selected
-  const handleStatusChange = (newStatus) => {
+  // Update any filter in the URL
+  const handleFilterChange = (filterName, value) => {
     const newParams = new URLSearchParams(searchParams);
 
-    if (newStatus === "All Tasks") {
-      newParams.delete("status");
+    if (!value || value === "All Tasks") {
+      newParams.delete(filterName);
     } else {
-      newParams.set("status", newStatus);
+      newParams.set(filterName, value);
     }
 
     setSearchParams(newParams);
-    setSelectedStatus(newStatus);
   };
 
   // Get tasks assigned to the logged-in user
@@ -127,24 +131,20 @@ function Dashboard() {
 
   // Apply project, status, team, and owner filters
   const filteredTasks = myTasks.filter((task) => {
-    // Handle project whether populated or an ID
     const taskProjectId =
       typeof task.project === "string" ? task.project : task.project?._id;
 
     const matchesProject =
-      !selectedProject || String(taskProjectId || "") === selectedProject;
+      !projectFilter || String(taskProjectId || "") === projectFilter;
 
-    // Preserve the existing URL status filter
-    const matchesUrlStatus =
+    const matchesStatus =
       statusFilter === "All Tasks" || task.status === statusFilter;
 
-    // Team filter
     const taskTeamId =
       typeof task.team === "string" ? task.team : task.team?._id;
 
     const matchesTeam = !teamFilter || String(taskTeamId || "") === teamFilter;
 
-    // Owner filter
     const matchesOwner =
       !ownerFilter ||
       (task.owners || []).some((owner) => {
@@ -153,7 +153,7 @@ function Dashboard() {
         return id && String(id) === ownerFilter;
       });
 
-    return matchesProject && matchesUrlStatus && matchesTeam && matchesOwner;
+    return matchesProject && matchesStatus && matchesTeam && matchesOwner;
   });
 
   // Generate user initials
@@ -225,7 +225,6 @@ function Dashboard() {
     <div className="dashboard-layout">
       <Sidebar />
 
-      {/* Main Content */}
       <main className="dashboard-main">
         <header className="dashboard-header">
           <div className="dashboard-title">
@@ -358,7 +357,9 @@ function Dashboard() {
                 <select
                   className="form-select task-filter-select"
                   value={selectedProject}
-                  onChange={(event) => setSelectedProject(event.target.value)}
+                  onChange={(event) =>
+                    handleFilterChange("project", event.target.value)
+                  }
                   aria-label="Filter tasks by project"
                 >
                   <option value="">All Projects</option>
@@ -373,7 +374,9 @@ function Dashboard() {
                 <select
                   className="form-select task-filter-select"
                   value={selectedStatus}
-                  onChange={(event) => handleStatusChange(event.target.value)}
+                  onChange={(event) =>
+                    handleFilterChange("status", event.target.value)
+                  }
                   aria-label="Filter tasks by status"
                 >
                   <option value="All Tasks">All Statuses</option>
