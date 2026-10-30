@@ -1,68 +1,117 @@
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 
-function Sidebar() {
-  const location = useLocation();
-  const navigate = useNavigate();
+const SidebarContent = ({ onNavigate }) => {
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
 
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    navigate("/login");
+    window.location.href = "/login";
   };
 
-  const links = [
-    { name: "Dashboard", path: "/dashboard", icon: "▦" },
-    { name: "Projects", path: "/projects", icon: "▤" },
-    { name: "Teams", path: "/teams", icon: "♧" },
-    { name: "Reports", path: "/reports", icon: "▥" },
-    { name: "Settings", path: "/settings", icon: "⚙" },
-  ];
-
-  const user = JSON.parse(localStorage.getItem("user") || "null");
-
   return (
-    <aside className="dashboard-sidebar">
-      <h3 className="sidebar-brand">
+    <>
+      <div className="sidebar-brand">
         Workasana<span>.</span>
-      </h3>
+      </div>
 
-      <p className="sidebar-label">WORKSPACE</p>
+      <p className="sidebar-label">MENU</p>
 
-      <nav className="sidebar-nav">
-        {links.map((link) => {
-          const active =
-            link.path === "/projects"
-              ? location.pathname.startsWith("/projects")
-              : location.pathname === link.path;
+      <nav className="sidebar-navigation">
+        <NavLink to="/dashboard" className="sidebar-link" onClick={onNavigate}>
+          <i className="bi bi-grid"></i> Dashboard
+        </NavLink>
 
-          return (
-            <Link
-              key={link.path}
-              to={link.path}
-              className={`sidebar-link ${active ? "active" : ""}`}
-            >
-              <span>{link.icon}</span> {link.name}
-            </Link>
-          );
-        })}
+        <NavLink to="/projects" className="sidebar-link" onClick={onNavigate}>
+          <i className="bi bi-folder"></i> Projects
+        </NavLink>
+
+        <NavLink to="/teams" className="sidebar-link" onClick={onNavigate}>
+          <i className="bi bi-people"></i> Teams
+        </NavLink>
+
+        <NavLink to="/reports" className="sidebar-link" onClick={onNavigate}>
+          <i className="bi bi-bar-chart"></i> Reports
+        </NavLink>
+
+        <NavLink to="/settings" className="sidebar-link" onClick={onNavigate}>
+          <i className="bi bi-gear"></i> Settings
+        </NavLink>
       </nav>
 
       <div className="sidebar-bottom">
-        <div className="user-avatar">
-          {user?.name?.charAt(0).toUpperCase() || "U"}
+        <div className="sidebar-profile">
+          <div className="profile-icon">
+            <i className="bi bi-person"></i>
+          </div>
+
+          <div className="profile-details">
+            <p className="profile-name">{user.name || "User"}</p>
+            <p className="profile-team">{user.team || "Team Member"}</p>
+          </div>
         </div>
 
-        <div className="sidebar-user-info">
-          <p className="user-name">{user?.name || "User"}</p>
-          <p className="user-role">Team Member</p>
-        </div>
-
-        <button className="sidebar-logout-button" onClick={handleLogout}>
+        <button className="sidebar-logout" onClick={handleLogout}>
+          <i className="bi bi-box-arrow-right"></i>
           Logout
         </button>
       </div>
-    </aside>
+    </>
   );
-}
+};
+
+const Sidebar = () => {
+  return (
+    <>
+      {/* Desktop Sidebar */}
+      <aside className="dashboard-sidebar desktop-sidebar">
+        <SidebarContent />
+      </aside>
+
+      {/* Mobile Toggle Button */}
+      <button
+        className="mobile-menu-toggle"
+        type="button"
+        data-bs-toggle="offcanvas"
+        data-bs-target="#mobileSidebar"
+        aria-controls="mobileSidebar"
+        aria-label="Open navigation menu"
+      >
+        <i className="bi bi-list"></i>
+      </button>
+
+      {/* Mobile Offcanvas Sidebar */}
+      <div
+        className="offcanvas offcanvas-start mobile-sidebar"
+        tabIndex="-1"
+        id="mobileSidebar"
+        aria-labelledby="mobileSidebarLabel"
+      >
+        <div className="offcanvas-header">
+          <h5 className="offcanvas-title" id="mobileSidebarLabel">
+            Workasana
+          </h5>
+
+          <button
+            type="button"
+            className="btn-close"
+            data-bs-dismiss="offcanvas"
+            aria-label="Close"
+          ></button>
+        </div>
+
+        <div className="offcanvas-body">
+          <SidebarContent
+            onNavigate={() => {
+              const element = document.getElementById("mobileSidebar");
+              const instance = window.bootstrap?.Offcanvas.getInstance(element);
+              instance?.hide();
+            }}
+          />
+        </div>
+      </div>
+    </>
+  );
+};
 
 export default Sidebar;
