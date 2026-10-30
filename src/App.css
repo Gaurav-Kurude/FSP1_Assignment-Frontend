@@ -6,6 +6,12 @@
   box-sizing: border-box;
 }
 
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
 body {
   margin: 0;
   font-family: Arial, sans-serif;
@@ -1482,17 +1488,75 @@ body {
   padding: 12px;
   border-radius: 8px;
   background: #fee2e2;
-  color: #b91c1c;
+  color: #dc2626;
+}
+
+.settings-header > p:first-child i {
+  margin-right: 6px;
+}
+
+.settings-card > p i {
+  margin-right: 5px;
+}
+
+.settings-info span i {
+  margin-right: 7px;
+}
+
+.settings-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.settings-loading i {
+  font-size: 20px;
+  animation: settings-spin 1s linear infinite;
+}
+
+@keyframes settings-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* =========================
-   Mobile Sidebar Controls
+   Mobile Sidebar - Bootstrap
 ========================= */
 
-.mobile-menu-toggle,
-.mobile-sidebar-close,
-.mobile-sidebar-overlay {
+/* Desktop sidebar */
+
+.desktop-sidebar {
+  display: flex;
+}
+
+/* Mobile toggle button */
+
+.mobile-menu-toggle {
   display: none;
+}
+
+/* Bootstrap Offcanvas sidebar */
+
+.mobile-sidebar {
+  width: 280px !important;
+  max-width: 85vw;
+  border-right: 1px solid #e9eaf0;
+}
+
+.mobile-sidebar .offcanvas-body {
+  display: flex;
+  flex-direction: column;
+  padding: 20px 18px;
+  overflow-y: auto;
+}
+
+.mobile-sidebar .sidebar-brand {
+  margin-bottom: 28px;
+}
+
+.mobile-sidebar .sidebar-bottom {
+  margin-top: auto;
 }
 
 /* =========================
@@ -1663,21 +1727,23 @@ body {
   }
 }
 
-/* Mobile drawer: below this width the sidebar becomes a slide-in menu */
-
 @media (max-width: 767px) {
+  /* Hide desktop sidebar */
+
   .desktop-sidebar {
     display: none !important;
   }
+
+  /* Show Bootstrap mobile toggle */
 
   .mobile-menu-toggle {
     position: fixed;
     top: 12px;
     left: 12px;
-    z-index: 1100;
+    z-index: 1030;
     display: flex;
-    align-items: center;
     justify-content: center;
+    align-items: center;
     width: 44px;
     height: 44px;
     border: 1px solid #e5e7eb;
@@ -1685,78 +1751,35 @@ body {
     background: #fff;
     color: #1e293b;
     font-size: 27px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     cursor: pointer;
   }
 
-  .mobile-sidebar {
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    z-index: 1200;
-    display: flex;
-    flex-direction: column;
-    width: 280px;
-    max-width: 85vw;
-    padding: 20px 18px;
-    overflow-y: auto;
-    background: #fff;
-    border-right: 1px solid #e5e7eb;
-    transform: translateX(-100%);
-    visibility: hidden;
-    transition:
-      transform 0.25s ease,
-      visibility 0.25s ease;
-  }
+  /* Mobile page layout */
 
-  .mobile-sidebar.mobile-sidebar-open {
-    transform: translateX(0);
-    visibility: visible;
-  }
-
-  .mobile-sidebar-close {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    align-self: flex-end;
-    width: 36px;
-    height: 36px;
-    margin: 0 0 10px;
-    border: none;
-    border-radius: 8px;
-    background: #f1f5f9;
-    color: #334155;
-    font-size: 20px;
-    cursor: pointer;
-  }
-
-  .mobile-sidebar-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 1150;
+  .dashboard-layout,
+  .project-page,
+  .team-management-page {
     display: block;
-    background: rgba(15, 23, 42, 0.45);
+    width: 100%;
+    min-height: 100vh;
+    height: auto;
+    overflow: visible;
   }
 
   .dashboard-main,
-  .project-main {
-    width: 100%;
-    margin-left: 0 !important;
-    padding: 70px 16px 24px !important;
-  }
-
-  .team-management-main {
-    width: 100%;
-    margin-left: 0 !important;
-    padding: 70px 16px 24px;
-  }
-
+  .project-main,
+  .team-management-main,
   .settings-page {
     width: 100%;
-    margin-left: 0;
-    padding: 70px 16px 24px;
+    min-width: 0;
+    height: auto;
+    min-height: 100vh;
+    margin-left: 0 !important;
+    padding: 70px 16px 30px !important;
+    overflow: visible;
   }
+
+  /* Task filters */
 
   .task-filters {
     display: flex;
@@ -1768,16 +1791,36 @@ body {
     max-width: 100%;
   }
 
+  /* Project filters */
+
   .project-filters {
     grid-template-columns: 1fr;
   }
 
+  /* Horizontal scrolling only for tables */
+
   .table-responsive {
+    width: 100%;
+    max-width: 100%;
     overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
   }
 
   .project-tasks-table {
     min-width: 650px;
+  }
+
+  /* Allow the document to scroll vertically */
+
+  html,
+  body,
+  #root {
+    width: 100%;
+    min-height: 100%;
+    height: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
   }
 }
 
@@ -1874,103 +1917,4 @@ body {
   .team-management-header h1 {
     font-size: 24px;
   }
-}
-
-/* Desktop sidebar */
-.desktop-sidebar {
-  display: flex;
-}
-
-/* Mobile toggle button */
-.mobile-menu-toggle {
-  display: none;
-}
-
-/* Mobile offcanvas */
-.mobile-sidebar {
-  width: 280px !important;
-  max-width: 85vw;
-  border-right: 1px solid #e9eaf0;
-}
-
-.mobile-sidebar .offcanvas-body {
-  display: flex;
-  flex-direction: column;
-  padding: 20px 18px;
-}
-
-.mobile-sidebar .sidebar-brand {
-  margin-bottom: 28px;
-}
-
-.mobile-sidebar .sidebar-bottom {
-  margin-top: auto;
-}
-
-/* Mobile layout */
-@media (max-width: 767px) {
-  .desktop-sidebar {
-    display: none !important;
-  }
-
-  .mobile-menu-toggle {
-    position: fixed;
-    top: 12px;
-    left: 12px;
-    z-index: 1030;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 44px;
-    height: 44px;
-    border: 1px solid #e5e7eb;
-    border-radius: 10px;
-    background: #fff;
-    color: #1e293b;
-    font-size: 27px;
-    cursor: pointer;
-  }
-
-  .dashboard-main,
-  .project-main,
-  .team-management-main,
-  .settings-page {
-    width: 100%;
-    margin-left: 0 !important;
-    padding: 70px 16px 24px !important;
-  }
-}
-
-.settings-header > p:first-child i {
-  margin-right: 6px;
-}
-
-.settings-card > p i {
-  margin-right: 5px;
-}
-
-.settings-info span i {
-  margin-right: 7px;
-}
-
-.settings-loading {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.settings-loading i {
-  font-size: 20px;
-  animation: settings-spin 1s linear infinite;
-}
-
-@keyframes settings-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.settings-error {
-  color: #dc2626;
-  margin-bottom: 16px;
 }
