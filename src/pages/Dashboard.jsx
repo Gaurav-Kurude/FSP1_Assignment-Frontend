@@ -107,15 +107,17 @@ function Dashboard() {
 
   // Update any filter in the URL
   const handleFilterChange = (filterName, value) => {
-    const newParams = new URLSearchParams(searchParams);
+    setSearchParams((currentParams) => {
+      const newParams = new URLSearchParams(currentParams);
 
-    if (!value || value === "All Tasks") {
-      newParams.delete(filterName);
-    } else {
-      newParams.set(filterName, value);
-    }
+      if (!value || value === "All Tasks") {
+        newParams.delete(filterName);
+      } else {
+        newParams.set(filterName, value);
+      }
 
-    setSearchParams(newParams);
+      return newParams;
+    });
   };
 
   // Get tasks assigned to the logged-in user
