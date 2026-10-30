@@ -1940,3 +1940,37 @@ body {
     padding: 70px 16px 24px !important;
   }
 }
+
+.settings-header > p:first-child i {
+  margin-right: 6px;
+}
+
+.settings-card > p i {
+  margin-right: 5px;
+}
+
+.settings-info span i {
+  margin-right: 7px;
+}
+
+.settings-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.settings-loading i {
+  font-size: 20px;
+  animation: settings-spin 1s linear infinite;
+}
+
+@keyframes settings-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.settings-error {
+  color: #dc2626;
+  margin-bottom: 16px;
+}
