@@ -52,15 +52,12 @@ function Sidebar() {
           {user?.name?.charAt(0).toUpperCase() || "U"}
         </div>
 
-        <div>
+        <div className="sidebar-user-info">
           <p className="user-name">{user?.name || "User"}</p>
           <p className="user-role">Team Member</p>
         </div>
 
-        <button
-          className="btn btn-outline-secondary btn-sm ms-auto"
-          onClick={handleLogout}
-        >
+        <button className="sidebar-logout-button" onClick={handleLogout}>
           Logout
         </button>
       </div>

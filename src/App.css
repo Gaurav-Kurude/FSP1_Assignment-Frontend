@@ -112,9 +112,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-top: auto;
-  padding: 18px 4px 0;
-  border-top: 1px solid #e9eaf0;
+  flex-wrap: nowrap;
 }
 
 .user-avatar,
@@ -142,13 +140,16 @@
   color: #20243a;
   font-size: 13px;
   font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .sidebar-user-info .user-role {
   margin: 0;
   color: #777c91;
   font-size: 12px;
-  overflow-wrap: anywhere;
+  white-space: nowrap;
 }
 
 .user-name {
