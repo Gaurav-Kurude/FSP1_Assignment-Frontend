@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import CreateTaskModal from "../components/CreateTaskModal";
 import "../App.css";
@@ -10,20 +10,39 @@ const API_URL = "https://fsp-1-assignment-backend-plum.vercel.app";
 function ProjectManagement() {
   const { projectId } = useParams();
 
+  // Read and update filters through URL query parameters
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const ownerFilter = searchParams.get("owner") || "All Owners";
+  const tagFilter = searchParams.get("tag") || "All Tags";
+  const statusFilter = searchParams.get("status") || "All Statuses";
+  const sortBy = searchParams.get("sort") || "default";
+
   const [project, setProject] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [users, setUsers] = useState([]);
   const [tags, setTags] = useState([]);
 
-  const [ownerFilter, setOwnerFilter] = useState("All Owners");
-  const [tagFilter, setTagFilter] = useState("All Tags");
-  const [statusFilter, setStatusFilter] = useState("All Statuses");
-  const [sortBy, setSortBy] = useState("default");
-
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // Update filters in the URL
+  const handleFilterChange = (filterName, value, defaultValue) => {
+    setSearchParams((currentParams) => {
+      const newParams = new URLSearchParams(currentParams);
+
+      if (!value || value === defaultValue) {
+        newParams.delete(filterName);
+      } else {
+        newParams.set(filterName, value);
+      }
+
+      return newParams;
+    });
+  };
+
+  // Fetch project data
   const fetchProjectData = useCallback(async () => {
     const token = localStorage.getItem("token");
 
@@ -93,6 +112,7 @@ function ProjectManagement() {
     fetchProjectData();
   }, [fetchProjectData]);
 
+  // Get owner name
   const getOwnerName = (owner) => {
     if (typeof owner === "object" && owner !== null) {
       return owner.name || owner.email || owner._id;
@@ -103,6 +123,7 @@ function ProjectManagement() {
     return user?.name || user?.email || owner;
   };
 
+  // Get tag name
   const getTagName = (tag) => {
     if (typeof tag === "object" && tag !== null) {
       return tag.name || tag._id;
@@ -113,14 +134,17 @@ function ProjectManagement() {
     return foundTag?.name || tag;
   };
 
+  // Generate owner options
   const ownerOptions = [
     ...new Set(tasks.flatMap((task) => (task.owners || []).map(getOwnerName))),
   ];
 
+  // Generate tag options
   const tagOptions = [
     ...new Set(tasks.flatMap((task) => (task.tags || []).map(getTagName))),
   ];
 
+  // Apply filters
   let filteredTasks = tasks.filter((task) => {
     const taskOwners = (task.owners || []).map(getOwnerName);
     const taskTags = (task.tags || []).map(getTagName);
@@ -136,6 +160,7 @@ function ProjectManagement() {
     return matchesOwner && matchesTag && matchesStatus;
   });
 
+  // Apply sorting
   if (sortBy === "time-asc") {
     filteredTasks = [...filteredTasks].sort(
       (a, b) => a.timeToComplete - b.timeToComplete,
@@ -146,6 +171,7 @@ function ProjectManagement() {
     );
   }
 
+  // Calculate task counts
   const completedCount = tasks.filter(
     (task) => task.status === "Completed",
   ).length;
@@ -174,6 +200,7 @@ function ProjectManagement() {
         {error && (
           <div className="alert alert-danger" role="alert">
             {error}
+
             <button
               className="btn btn-sm btn-outline-danger ms-3"
               onClick={fetchProjectData}
@@ -204,6 +231,7 @@ function ProjectManagement() {
               </button>
             </header>
 
+            {/* Project Summary */}
             <section className="project-summary">
               <div className="summary-item">
                 <span>Total Tasks</span>
@@ -221,6 +249,7 @@ function ProjectManagement() {
               </div>
             </section>
 
+            {/* Project Tasks */}
             <section className="project-tasks-section">
               <div className="section-heading">
                 <div>
@@ -231,7 +260,9 @@ function ProjectManagement() {
                 <span className="task-count">{filteredTasks.length} tasks</span>
               </div>
 
+              {/* Filters */}
               <div className="project-filters">
+                {/* Owner Filter */}
                 <div className="filter-field">
                   <label htmlFor="ownerFilter">Filter by Owner</label>
 
@@ -239,9 +270,15 @@ function ProjectManagement() {
                     id="ownerFilter"
                     className="form-select"
                     value={ownerFilter}
-                    onChange={(event) => setOwnerFilter(event.target.value)}
+                    onChange={(event) =>
+                      handleFilterChange(
+                        "owner",
+                        event.target.value,
+                        "All Owners",
+                      )
+                    }
                   >
-                    <option>All Owners</option>
+                    <option value="All Owners">All Owners</option>
 
                     {ownerOptions.map((owner) => (
                       <option key={owner} value={owner}>
@@ -251,6 +288,7 @@ function ProjectManagement() {
                   </select>
                 </div>
 
+                {/* Tag Filter */}
                 <div className="filter-field">
                   <label htmlFor="tagFilter">Filter by Tag</label>
 
@@ -258,9 +296,11 @@ function ProjectManagement() {
                     id="tagFilter"
                     className="form-select"
                     value={tagFilter}
-                    onChange={(event) => setTagFilter(event.target.value)}
+                    onChange={(event) =>
+                      handleFilterChange("tag", event.target.value, "All Tags")
+                    }
                   >
-                    <option>All Tags</option>
+                    <option value="All Tags">All Tags</option>
 
                     {tagOptions.map((tag) => (
                       <option key={tag} value={tag}>
@@ -270,6 +310,7 @@ function ProjectManagement() {
                   </select>
                 </div>
 
+                {/* Status Filter */}
                 <div className="filter-field">
                   <label htmlFor="statusFilter">Filter by Status</label>
 
@@ -277,16 +318,23 @@ function ProjectManagement() {
                     id="statusFilter"
                     className="form-select"
                     value={statusFilter}
-                    onChange={(event) => setStatusFilter(event.target.value)}
+                    onChange={(event) =>
+                      handleFilterChange(
+                        "status",
+                        event.target.value,
+                        "All Statuses",
+                      )
+                    }
                   >
-                    <option>All Statuses</option>
-                    <option>To Do</option>
-                    <option>In Progress</option>
-                    <option>Completed</option>
-                    <option>Blocked</option>
+                    <option value="All Statuses">All Statuses</option>
+                    <option value="To Do">To Do</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Blocked">Blocked</option>
                   </select>
                 </div>
 
+                {/* Sort Filter */}
                 <div className="filter-field">
                   <label htmlFor="sortBy">Sort by Estimated Time</label>
 
@@ -294,7 +342,9 @@ function ProjectManagement() {
                     id="sortBy"
                     className="form-select"
                     value={sortBy}
-                    onChange={(event) => setSortBy(event.target.value)}
+                    onChange={(event) =>
+                      handleFilterChange("sort", event.target.value, "default")
+                    }
                   >
                     <option value="default">Default</option>
                     <option value="time-asc">Least Time Required</option>
@@ -303,6 +353,7 @@ function ProjectManagement() {
                 </div>
               </div>
 
+              {/* Task Table */}
               <div className="table-responsive">
                 <table className="table project-tasks-table align-middle">
                   <thead>
@@ -375,6 +426,7 @@ function ProjectManagement() {
         )}
       </main>
 
+      {/* Create Task Modal */}
       {showTaskModal && project && (
         <CreateTaskModal
           projectId={project._id}
