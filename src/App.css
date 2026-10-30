@@ -1561,7 +1561,7 @@
   }
 
   .team-management-main {
-    margin-left: 0;
+    margin-left: 180px;
     padding: 18px;
   }
 
@@ -1593,13 +1593,21 @@
 }
 
 @media (max-width: 575px) {
+  /* Keep sidebar fixed on the left */
   .dashboard-sidebar,
   .project-sidebar {
-    position: static;
-    width: 100%;
-    padding: 18px;
-    border-right: none;
-    border-bottom: 1px solid #e9eaf0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 180px;
+    height: 100vh;
+    padding: 20px 10px;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #e9eaf0;
+    border-bottom: none;
+    overflow-y: auto;
   }
 
   .sidebar-brand,
@@ -1608,15 +1616,26 @@
     font-size: 22px;
   }
 
-  .sidebar-label,
+  .sidebar-label {
+    display: block;
+    margin-left: 8px;
+  }
+
   .sidebar-bottom {
-    display: none;
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 6px;
+    width: 100%;
+    margin-top: auto;
+    padding: 14px 0 0;
   }
 
   .sidebar-nav,
   .project-sidebar .sidebar-nav {
-    flex-direction: row;
-    flex-wrap: wrap;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
     gap: 6px;
   }
 
@@ -1628,13 +1647,26 @@
   }
 
   .sidebar-link span {
-    width: auto;
+    width: 20px;
     font-size: 15px;
+  }
+
+  .sidebar-user-info .user-name {
+    font-size: 11px;
+  }
+
+  .sidebar-user-info .user-role {
+    font-size: 10px;
+  }
+
+  .sidebar-logout-button {
+    padding: 5px 6px;
+    font-size: 10px;
   }
 
   .dashboard-main,
   .project-main {
-    margin-left: 0;
+    margin-left: 180px;
     padding: 24px 16px;
   }
 
@@ -1728,8 +1760,8 @@
   }
 
   .settings-page {
-    width: 100%;
-    margin-left: 0;
+    width: calc(100% - 180px);
+    margin-left: 180px;
     padding: 24px 16px;
   }
 
