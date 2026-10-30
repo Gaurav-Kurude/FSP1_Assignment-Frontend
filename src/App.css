@@ -48,6 +48,7 @@
   position: fixed;
   top: 0;
   bottom: 0;
+  height: 100vh;
   left: 0;
   z-index: 100;
   display: flex;
@@ -113,6 +114,11 @@
   align-items: center;
   gap: 10px;
   flex-wrap: nowrap;
+  width: 100%;
+  margin-top: auto;
+  padding: 18px 4px 0;
+  border-top: 1px solid #e9eaf0;
+  flex-shrink: 0;
 }
 
 .user-avatar,
@@ -150,18 +156,6 @@
   color: #777c91;
   font-size: 12px;
   white-space: nowrap;
-}
-
-.user-name {
-  margin: 0 0 3px;
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.user-role {
-  margin: 0;
-  color: #9296a8;
-  font-size: 12px;
 }
 
 .sidebar-logout-button {
