@@ -419,11 +419,20 @@ function Dashboard() {
                             {getInitials(ownerNames[0] || user?.name)}
                           </div>
 
-                          <span>
-                            {ownerNames.length > 0
-                              ? ownerNames.join(", ")
-                              : "Unassigned"}
-                          </span>
+                          <div className="owner-names">
+                            {ownerNames.length > 0 ? (
+                              ownerNames.map((name, index) => (
+                                <span
+                                  className="owner-name"
+                                  key={`${name}-${index}`}
+                                >
+                                  {name}
+                                </span>
+                              ))
+                            ) : (
+                              <span className="owner-name">Unassigned</span>
+                            )}
+                          </div>
                         </div>
 
                         <span

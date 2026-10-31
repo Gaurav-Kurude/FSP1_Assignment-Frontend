@@ -1962,3 +1962,83 @@ body,
     overflow-y: visible;
   }
 }
+
+/* Keep every task row aligned */
+.task-row {
+  display: grid;
+  grid-template-columns: minmax(220px, 2fr) minmax(180px, 1.5fr) 130px 80px;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  min-width: 0;
+}
+
+/* Task information */
+.task-information {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.task-information > div:last-child {
+  min-width: 0;
+}
+
+.task-information h3 {
+  overflow-wrap: anywhere;
+}
+
+/* Owners section */
+.task-owner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+}
+
+.owner-avatar {
+  flex-shrink: 0;
+}
+
+.owner-names {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+
+.owner-name {
+  display: inline-block;
+  max-width: 100%;
+  padding: 4px 8px;
+  background: #f1f3f5;
+  border-radius: 12px;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+/* Status and action */
+.task-status {
+  justify-self: start;
+  white-space: normal;
+}
+
+.task-row > div:last-child {
+  justify-self: end;
+  white-space: nowrap;
+}
+
+/* Tablet and mobile */
+@media (max-width: 767px) {
+  .task-row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    align-items: start;
+  }
+
+  .task-row > div:last-child {
+    justify-self: start;
+  }
+}
